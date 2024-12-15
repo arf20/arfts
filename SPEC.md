@@ -1,4 +1,4 @@
-# Language spec v1
+# Language spec v1.1
 
 Lines that begin with '.' at the first column are arfts commands.
 arfts commands are case insensitive. Some commands use '!' after '.' to denote
@@ -112,7 +112,7 @@ List item
 
 ## Tables
 
-### .table
+### .table [table description]
 
 Begins table
 
@@ -130,9 +130,9 @@ Cell
 
 ## Graphics or whatever
 
-### .pre, .!pre
+### .fig [figure text], .!fig
 
-Preformat
+Preformat block for whatever
 
 ## Inline commands
 
@@ -141,6 +141,10 @@ Also starts by '.' but may be inside a paragraph.
 ### .br
 
 Inserts line break
+
+### .tab
+
+Inserts indentation, useful before .table or .fig for example
 
 ### .ref \<refname>
 
