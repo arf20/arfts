@@ -1,4 +1,4 @@
-# Language spec v1.1
+# Language spec v1.2
 
 Lines that begin with '.' at the first column are arfts commands.
 arfts commands are case insensitive. Some commands use '!' after '.' to denote
@@ -92,7 +92,24 @@ Inserts form feed
 ### .tableofcontents
 
 Generates a table of contents page(s) from the document structure commands and
-pages.
+pages
+
+## Formatting
+
+### .align justify left | center | right
+
+Default justify
+
+### .columns \<n> [m]
+
+Default single column
+
+ - n: columns [default 1]
+ - m: column spacing (spaces between them) [default 4]
+
+### .margin \<t> \<l> \<b> \<r>
+
+Default all 0
 
 ## Lists
 
