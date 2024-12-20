@@ -4,20 +4,16 @@
 #include <errno.h>
 
 #include "util.h"
+#include "command.h"
 
 void
 usage(char *argv0) {
-    printf("usage: %s <file>\n\n");
+    printf("usage: %s <file>\n\n", argv0);
 }
 
-int
-main(int argc, char **argv) {
-    if (argc != 2) {
-        usage(*argv);
-        exit(1);
-    }
 
-    char *fname = argv[1];
+void
+parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
     FILE *f = fopen(fname, "r");
     if (!f) {
         fprintf(stderr, "Error opening file: %s\n", strerror(errno));
@@ -33,18 +29,43 @@ main(int argc, char **argv) {
 
     fclose(f);
 
-    char *cursor = src;
+    const char *cursor = src;
+    state_t st;
     while (*cursor) {
         cursor = strip(cursor);
 
         if (*cursor == '.') {
             /* command */
-
+            cursor = interpret_command(cursor, cfg, &st, doc);
+        } else if (*cursor == '\n')
+            cursor++;
+            /* new paragraph */
+        else {
+            /* text */
+            
         }
     }
 
-
     free(src);
+}
+
+docentry_t *
+doc_new() {
+    docentry_t *newdoc = malloc(sizeof(docentry_t));
+}
+
+
+int
+main(int argc, char **argv) {
+    if (argc != 2) {
+        usage(*argv);
+        exit(1);
+    }
+
+    docconfig_t cfg;
+    docentry_t *doc;
+    parse_file(argv[1], &cfg);
+
     return 0;
 }
 

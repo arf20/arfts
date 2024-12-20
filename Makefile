@@ -14,7 +14,7 @@ $(BINARY): $(OBJ)
 	$(CC) -o $(BINARY) $(OBJ) $(LDFLAGS)
 
 %.o: %.c $(HDR)
-	$(CC) -c $(CCFLAGS) $<
+	$(CC) -c $(CFLAGS) $<
 
 .PHONY: clean
 clean:
