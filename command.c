@@ -114,7 +114,7 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}
     else if (strncmp(cmd, ".footnotedef", cmdlen) == 0) {}
     else
-        fprintf(stderr, "Warning: unrecognized command: %.*s", cmdlen, cmd);
+        fprintf(stderr, "Warning: unrecognized command: %.*s\n", cmdlen, cmd);
 
     return end + 1;
 }

@@ -5,6 +5,7 @@
 
 #include "util.h"
 #include "command.h"
+#include "doc.h"
 
 void
 usage(char *argv0) {
@@ -30,28 +31,36 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
     fclose(f);
 
     const char *cursor = src;
-    state_t st;
+    state_t st = { 0 };
+    docentry_t *cur_entry = doc; /* current document entry */
     while (*cursor) {
         cursor = strip(cursor);
 
         if (*cursor == '.') {
             /* command */
             cursor = interpret_command(cursor, cfg, &st, doc);
-        } else if (*cursor == '\n')
+        } else if (*cursor == '\n') {
             cursor++;
-            /* new paragraph */
-        else {
-            /* text */
             
+            if (st.prev_nl) {
+                /* break paragraph */
+                cur_entry = doc_new_null(cur_entry);
+            }
+
+            st.prev_nl = 1;
+        }
+        else {
+            /* body word */
+            if (cur_entry->type != EPARAGRAPH)
+                cur_entry = doc_new_paragraph(cur_entry);
+
+            cursor = doc_add_word(cur_entry, cursor);
+
+            st.prev_nl = 0;
         }
     }
 
     free(src);
-}
-
-docentry_t *
-doc_new() {
-    docentry_t *newdoc = malloc(sizeof(docentry_t));
 }
 
 
@@ -63,8 +72,8 @@ main(int argc, char **argv) {
     }
 
     docconfig_t cfg;
-    docentry_t *doc;
-    parse_file(argv[1], &cfg);
+    docentry_t *doc = doc_new();
+    parse_file(argv[1], &cfg, doc);
 
     return 0;
 }

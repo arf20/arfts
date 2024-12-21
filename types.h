@@ -1,6 +1,8 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
+#include <stddef.h>
+
 /* Typesetting config for document */
 typedef struct {
     int pagewidth, pageheight, tabstop, indentparagraphs, titlepage;
@@ -10,22 +12,9 @@ typedef struct {
 
 /* Reader state */
 typedef struct {
-
+    int prev_nl, in_pre;
 } state_t;
 
-
-/* Document node type */
-typedef enum {
-    PARAGRAPH
-} entrytype_t;
-
-/* Document tree node */
-typedef struct docentry_s {
-    entrytype_t type;
-    char *data;
-    size_t size;
-    struct docnode_s n;
-} docentry_t;
 
 #endif /* _TYPES_H */
 
