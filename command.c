@@ -5,66 +5,114 @@
 #include <stdlib.h>
 
 #include "util.h"
+#include "doc.h"
 
 void
-cmd_pagewidth(const char *args, docconfig_t *cfg) {
+cmd_pagewidth(const char *args, state_t *st, docconfig_t *cfg) {
     cfg->pagewidth = strtol(args, NULL, 10);
 }
 
 void
-cmd_pageheight(const char *args, docconfig_t *cfg) {
+cmd_pageheight(const char *args, state_t *st, docconfig_t *cfg) {
     cfg->pageheight = strtol(args, NULL, 10);
 }
 
 void
-cmd_tabstop(const char *args, docconfig_t *cfg) {
-    cfg->pageheight = strtol(args, NULL, 10);
+cmd_tabstop(const char *args, state_t *st, docconfig_t *cfg) {
+    cfg->tabstop = strtol(args, NULL, 10);
 }
 
 void
-cmd_indentparagraph(const char *args, docconfig_t *cfg) {
-    cfg->pageheight = strtol(args, NULL, 10);
+cmd_indentparagraph(const char *args, state_t *st, docconfig_t *cfg) {
+    args = strip(args);
+    if (strncmp(args, "on", 2) == 0)
+        cfg->indentparagraph = 1;
+    else
+        cfg->indentparagraph = 0;
 }
 
 void
-cmd_header(const char *args, docconfig_t *cfg) {
+cmd_header(const char *args, state_t *st, docconfig_t *cfg) {
     char *tok1, *tok2, *tok3;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
     args = tokenize(args, &tok3);
+
+    if (cfg->headerl || cfg->headerc || cfg->headerr)
+        fprintf(stderr, "L%d: (W) Header redefined\n", st->linenum);
+
+    if (tok1 && tok2 && tok3) {
+        cfg->headerl = tok1;
+        cfg->headerc = tok2;
+        cfg->headerr = tok3;
+    } else if (tok1 && tok2) {
+        cfg->headerl = tok1;
+        cfg->headerr = tok2;
+    } else if (tok1) {
+        cfg->headerl = tok1;
+    } else {
+        fprintf(stderr, "L%d: (E) Too few arguments for .header\n",
+            st->linenum);
+    }
 }
 
 void
-cmd_footer(const char *args, docconfig_t *cfg) {
+cmd_footer(const char *args, state_t *st, docconfig_t *cfg) {
     char *tok1, *tok2, *tok3;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
     args = tokenize(args, &tok3);
+
+    if (cfg->footerl || cfg->footerc || cfg->footerr)
+        fprintf(stderr, "L%d: (W) Footer redefined\n", st->linenum);
+
+    if (tok1 && tok2 && tok3) {
+        cfg->footerl = tok1;
+        cfg->footerc = tok2;
+        cfg->footerr = tok3;
+    } else if (tok1 && tok2) {
+        cfg->footerl = tok1;
+        cfg->footerr = tok2;
+    } else if (tok1) {
+        cfg->footerl = tok1;
+    } else {
+        fprintf(stderr, "L%d: (E) Too few arguments for .footer\n",
+            st->linenum);
+    }
 }
 
 void
-cmd_title(const char *args, docconfig_t *cfg) {
+cmd_title(const char *args, state_t *st, docconfig_t *cfg) {
+    args = strip(args);
     const char *end = strchr(args, '\n');
     cfg->title = strndup(args, end - args);
 }
 
 void
-cmd_author(const char *args, docconfig_t *cfg) {
+cmd_author(const char *args, state_t *st, docconfig_t *cfg) {
+    args = strip(args);
     const char *end = strchr(args, '\n');
     cfg->author = strndup(args, end - args);
 }
 
 void
-cmd_date(const char *args, docconfig_t *cfg) {
+cmd_date(const char *args, state_t *st, docconfig_t *cfg) {
+    args = strip(args);
     const char *end = strchr(args, '\n');
     cfg->date = strndup(args, end - args);
 }
 
+void
+cmd_titlepage(const char *args, state_t *st, docconfig_t *cfg,
+    docentry_t *e)
+{
+     doc_insert_titlepage(e);
+}
 
 
 const char*
 interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
-    docentry_t *doc)
+    docentry_t *e)
 {
     const char *cmdend = strpbrk(cmd, " \n");
     int cmdlen = cmdend - cmd;
@@ -74,25 +122,25 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     printf("cmd: %.*s\n", cmdlen, cmd);
 
     if      (strncmp(cmd, ".pagewidth", cmdlen) == 0)
-        cmd_pagewidth(cmd + cmdlen, cfg);
+        cmd_pagewidth(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".pageheight", cmdlen) == 0)
-        cmd_pageheight(cmd + cmdlen, cfg);
+        cmd_pageheight(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".tabstop", cmdlen) == 0)
-        cmd_tabstop(cmd + cmdlen, cfg);
+        cmd_tabstop(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".indentparagraph", cmdlen) == 0)
-        cmd_indentparagraph(cmd + cmdlen, cfg);
+        cmd_indentparagraph(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".header", cmdlen) == 0)
-        cmd_header(cmd + cmdlen, cfg);
+        cmd_header(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".footer", cmdlen) == 0)
-        cmd_footer(cmd + cmdlen, cfg);
+        cmd_footer(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".title", cmdlen) == 0)
-        cmd_title(cmd + cmdlen, cfg);
+        cmd_title(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".author", cmdlen) == 0)
-        cmd_author(cmd + cmdlen, cfg);
+        cmd_author(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".date", cmdlen) == 0)
-        cmd_date(cmd + cmdlen, cfg);
+        cmd_date(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".titlepage", cmdlen) == 0)
-    {} //cmd_titlepage(cmd + cmdlen, cfg);
+        cmd_titlepage(cmd + cmdlen, st, cfg, e);
     else if (strncmp(cmd, ".part", cmdlen) == 0) {}
     else if (strncmp(cmd, ".chapter", cmdlen) == 0) {}
     else if (strncmp(cmd, ".section", cmdlen) == 0) {}
@@ -114,7 +162,9 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}
     else if (strncmp(cmd, ".footnotedef", cmdlen) == 0) {}
     else
-        fprintf(stderr, "Warning: unrecognized command: %.*s\n", cmdlen, cmd);
+        fprintf(stderr, "(W) Unrecognized command: %.*s\n", cmdlen, cmd);
+
+    st->linenum++;
 
     return end + 1;
 }

@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
+#include "types.h"
+
 #define EPARAGRAPH_INITIAL_CAPACITY 256
 
 /* Document node type */
@@ -24,9 +26,10 @@ typedef struct docentry_s {
 
 
 docentry_t *doc_new();
-docentry_t *doc_new_null(docentry_t *e);
-docentry_t *doc_new_paragraph(docentry_t *e);
-const char *doc_add_word(docentry_t *e, const char *wordoff);
+docentry_t *doc_insert_null(docentry_t *e);
+docentry_t *doc_insert_paragraph(docentry_t *e);
+docentry_t *doc_insert_titlepage(docentry_t *e);
+const char *doc_add_word(docentry_t *e, state_t *st, const char *wordoff);
  
 
 #endif /* _DOC_H */

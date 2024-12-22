@@ -5,8 +5,9 @@
 .tabstop 4
 
 .indentparagraph on
-.header "LEFT" "MIDDLE" pagenumext
+.header "LEFT HEADER" "MIDDLE HEADER" pagenumext
 .footer off
+.footer "aesadf dfds"
 
 .title arfts test
 .author Angel Ruiz Fernandez
@@ -14,7 +15,7 @@
 
 .titlepage
 
-.first section
+.badcommand
 
 First paragraph asdlisjf o oig osidf io jio io io hgyl uyg uykg uky guyk g ukyg uki g ukyjg uky g ukyg uky guky g ukyg uykg uky guky guky gjk yg jkhg olg kjygf yjtfc jcfjj gv jv gh
 This should be in the same paragraph

@@ -5,14 +5,14 @@
 
 /* Typesetting config for document */
 typedef struct {
-    int pagewidth, pageheight, tabstop, indentparagraphs, titlepage;
+    int pagewidth, pageheight, tabstop, indentparagraph;
     char *headerl, *headerc, *headerr, *footerl, *footerc, *footerr;
     char *title, *author, *date;
 } docconfig_t;
 
 /* Reader state */
 typedef struct {
-    int prev_nl, in_pre;
+    int linenum, prev_nl, in_pre;
 } state_t;
 
 

@@ -28,7 +28,11 @@ const char *tokenize(const char *s, char **tok) {
             *tok = NULL;
             return s;
         }
-        *tok = strndup(s + 1, end - s);
+        if (end - s)
+            *tok = strndup(s, end - s);
+        else
+            *tok = NULL;
         return end;
     }
 }
+
