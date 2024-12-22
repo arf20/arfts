@@ -103,23 +103,68 @@ cmd_date(const char *args, state_t *st, docconfig_t *cfg) {
 }
 
 void
-cmd_titlepage(const char *args, state_t *st, docconfig_t *cfg,
-    docentry_t *e)
-{
-     doc_insert_titlepage(e);
+cmd_titlepage(const char *args, docentry_t **e) {
+     *e = doc_insert_titlepage(*e);
+}
+
+void
+cmd_part(const char *args, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_structure(*e, SPART, strndup(args, end - args));
+}
+
+void
+cmd_chapter(const char *args, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_structure(*e, SCHAPTER, strndup(args, end - args));
+}
+
+void
+cmd_section(const char *args, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_structure(*e, SSECTION, strndup(args, end - args));
+}
+
+void
+cmd_subsection(const char *args, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_structure(*e, SSUBSECTION, strndup(args, end - args));
+}
+
+void
+cmd_subsubsection(const char *args, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_structure(*e, SSUBSUBSECTION, strndup(args, end - args));
 }
 
 
+void
+cmd_pagebreak(docentry_t **e) {
+    *e = doc_insert_pagebreak(*e);
+}
+
+void
+cmd_tableofcontents(docentry_t **e) {
+    *e = doc_insert_tableofcontents(*e);
+}
+
 const char*
 interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
-    docentry_t *e)
+    docentry_t **e)
 {
     const char *cmdend = strpbrk(cmd, " \n");
     int cmdlen = cmdend - cmd;
     const char *end = strchr(cmd, '\n');
 
     /* debug */
+    #ifdef _DEBUG_STATE_
     printf("cmd: %.*s\n", cmdlen, cmd);
+    #endif /* _DEBUG_STATE_ */
 
     if      (strncmp(cmd, ".pagewidth", cmdlen) == 0)
         cmd_pagewidth(cmd + cmdlen, st, cfg);
@@ -140,14 +185,21 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     else if (strncmp(cmd, ".date", cmdlen) == 0)
         cmd_date(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".titlepage", cmdlen) == 0)
-        cmd_titlepage(cmd + cmdlen, st, cfg, e);
-    else if (strncmp(cmd, ".part", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".chapter", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".section", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".subsection", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".subsubsection", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".pagebreak", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".tableofcontents", cmdlen) == 0) {}
+        cmd_titlepage(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".part", cmdlen) == 0)
+        cmd_part(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".chapter", cmdlen) == 0)
+        cmd_chapter(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".section", cmdlen) == 0)
+        cmd_section(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".subsection", cmdlen) == 0)
+        cmd_subsection(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".subsubsection", cmdlen) == 0)
+        cmd_subsubsection(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".pagebreak", cmdlen) == 0)
+        cmd_pagebreak(e);
+    else if (strncmp(cmd, ".tableofcontents", cmdlen) == 0)
+        cmd_tableofcontents(e);
     else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
     else if (strncmp(cmd, ".enumerate", cmdlen) == 0) {}
     else if (strncmp(cmd, ".item", cmdlen) == 0) {}
@@ -162,7 +214,8 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}
     else if (strncmp(cmd, ".footnotedef", cmdlen) == 0) {}
     else
-        fprintf(stderr, "(W) Unrecognized command: %.*s\n", cmdlen, cmd);
+        fprintf(stderr, "L%d: (W) Unrecognized command: %.*s\n", st->linenum,
+            cmdlen, cmd);
 
     st->linenum++;
 

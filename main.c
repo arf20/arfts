@@ -40,7 +40,7 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
 
         if (*cursor == '.') {
             /* command */
-            cursor = interpret_command(cursor, cfg, &st, doc);
+            cursor = interpret_command(cursor, cfg, &st, &cur_entry);
         } else if (*cursor == '\n') {
             cursor++;
             st.linenum++;
@@ -77,6 +77,27 @@ main(int argc, char **argv) {
     docconfig_t cfg = { 0 };
     docentry_t *doc = doc_new();
     parse_file(argv[1], &cfg, doc);
+
+
+    /* debug */
+    int c = 0;
+    for (docentry_t *e = doc; e != NULL; e = e->n, c++) {
+        printf(" doc[%d]: %s", c, entrytype_names[e->type]);
+        switch (e->type) {
+            case ENULL: break;
+            case EPARAGRAPH: printf(" \"%.*s\"", (int)e->size, e->data); break;
+            case EPREFORMAT: break;
+            case ESTRUCTURE: {
+                docentry_structure_t *es = (docentry_structure_t*)e->data;
+                printf(": %s \"%s\"", structuretype_names[es->type],
+                    es->heading);
+            } break;
+            case ETITLEPAGE: break;
+            case EPAGEBREAK: break;
+            case ETABLEOFCONTENTS: break;
+        }
+        putchar('\n');
+    }
 
     return 0;
 }
