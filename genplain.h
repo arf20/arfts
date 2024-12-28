@@ -2,8 +2,11 @@
 #define _GENPLAIN_H
 
 #include "types.h"
+#include "doc.h"
 
-int generate_plain(const docconfig_t *cfg, const docentry_t *doc, FILE *o);
+#include <stdio.h>
+
+void generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o);
 
 #endif /* _GENPLAIN_H */
 

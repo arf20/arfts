@@ -23,6 +23,7 @@ extern const char *entrytype_names[];
 /* Document tree node */
 typedef struct docentry_s {
     entrytype_t type;
+    int page, line, height;
     char *data;
     size_t size, capacity;
     struct docentry_s *n;
@@ -41,7 +42,6 @@ extern const char *structuretype_names[];
 
 typedef struct {
     structuretype_t type;
-    int pagenum;
     const char *heading;
 } docentry_structure_t;
 

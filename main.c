@@ -6,6 +6,7 @@
 #include "util.h"
 #include "command.h"
 #include "doc.h"
+#include "genplain.h"
 
 void
 usage(char *argv0) {
@@ -121,6 +122,9 @@ main(int argc, char **argv) {
     /* debug */
     doc_print(doc); 
     docconfig_print(&cfg);
+
+
+    generate_plain(&cfg, doc, stdout);
 
     return 0;
 }

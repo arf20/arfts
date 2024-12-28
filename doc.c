@@ -38,6 +38,7 @@ doc_insert_null(docentry_t *e) {
     docentry_t *newe = malloc(sizeof(docentry_t));
     newe->type = ENULL;
     newe->n = NULL;
+    newe->height = 0;
 
     e->n = newe;
     return newe;
@@ -59,6 +60,7 @@ doc_insert_paragraph(docentry_t *e) {
     newe->data = malloc(EPARAGRAPH_INITIAL_CAPACITY);
     newe->capacity = EPARAGRAPH_INITIAL_CAPACITY;
     newe->size = 0;
+    newe->height = 0;
 
     return newe;
 }
@@ -114,10 +116,10 @@ doc_insert_structure(docentry_t *e, structuretype_t type, const char *heading) {
 
     newe->data = malloc(sizeof(docentry_structure_t));
     newe->size = newe->capacity = sizeof(docentry_structure_t);
+    newe->height = 2;
 
     docentry_structure_t *s = (docentry_structure_t*)newe->data;
     s->type = type;
-    s->pagenum = -1;
     s->heading = heading;
 
     return newe;
@@ -134,6 +136,7 @@ doc_insert_pagebreak(docentry_t *e) {
         e->n = newe;
     }
     newe->type = EPAGEBREAK;
+    newe->height = 0;
 
     return newe;
 }
@@ -149,6 +152,7 @@ doc_insert_tableofcontents(docentry_t *e) {
         e->n = newe;
     }
     newe->type = ETABLEOFCONTENTS;
+    newe->height = 0;
 
     return newe;
 }

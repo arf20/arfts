@@ -1,0 +1,99 @@
+ doc[0]: titlepage
+ doc[1]: tableofcontents
+ doc[2]: structure: section "First section oidjfodaif oiafjo"
+ doc[3]: paragraph "First paragraph asdlisjf o oig osidf io jio io io hgyl uyg uykg uky guyk g ukyg uki g ukyjg uky g ukyg uky guky g ukyg uykg uky guky guky gjk yg jkhg olg kjygf yjtfc jcfjj gv jv gh This should be in the same paragraph "
+ doc[4]: paragraph "This should be a new paragraph is it? "
+ doc[5]: pagebreak
+ doc[6]: structure: subsection "Subsection of the first section"
+ doc[7]: paragraph "silly text asd askdfk df owo "
+ doc[8]: structure: subsection "Another one for good measure"
+ doc[9]: paragraph "ids fsid fsiu fiiufeiueiuf eqiuiuewiueq heqiur oi "
+ doc[10]: null
+doc config:
+ page dimensions: 80x137
+ tabstop: true
+ indent paragraphs: 1
+ margins: 0 4 1 4
+ header: (left) "LEFT HEADER" (center) "MIDDLE HEADER" (right) "pagenumext"
+ footer: (left) "FOOTER aesadf dfds" (center) "(null)" (right) "(null)"
+ title: arfts test
+ author: Angel Ruiz Fernandez
+ date: 12-12-2024
+LEFT HEADER                      MIDDLE HEADER                            PAGE 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                   arfts test
+                              Angel Ruiz Fernandez
+                                   12-12-2024
+
+FOOTER aesadf dfds                                                              
+LEFT HEADER                      MIDDLE HEADER                            PAGE 2
+    TABLE OF CONTENTS
+    1. First section oidjfodaif oiafjo ...................................3
+        1.1. Subsection of the first section .............................4
+        1.2. Another one for good measure ................................4
+
+FOOTER aesadf dfds                                                              
+LEFT HEADER                      MIDDLE HEADER                            PAGE 3
+    1. First section oidjfodaif oiafjo
+
+        First paragraph asdlisjf o oig osidf io jio io io hgyl uyg uykg 
+    uky guyk g ukyg uki g ukyjg uky g ukyg uky guky g ukyg uykg uky guky guky 
+    gjk yg jkhg olg kjygf yjtfc jcfjj gv jv gh This should be in the same 
+    paragraph  
+
+        This should be a new paragraph is it?  
+
+
+FOOTER aesadf dfds                                                              
+LEFT HEADER                      MIDDLE HEADER                            PAGE 4
+    1.1. Subsection of the first section
+
+        silly text asd askdfk df owo  
+
+    1.2. Another one for good measure
+
+        ids fsid fsiu fiiufeiueiuf eqiuiuewiueq heqiur oi  
+
