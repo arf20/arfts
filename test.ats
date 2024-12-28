@@ -3,6 +3,7 @@
 .tabstop 4
 .pageheight 137
 .tabstop 4
+.margin 0 4 1 4
 
 .indentparagraph on
 .header "LEFT HEADER" "MIDDLE HEADER" pagenumext

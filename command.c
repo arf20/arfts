@@ -82,6 +82,26 @@ cmd_footer(const char *args, state_t *st, docconfig_t *cfg) {
 }
 
 void
+cmd_margin(const char *args, state_t *st, docconfig_t *cfg) {
+    char *tok1, *tok2, *tok3, *tok4;
+    args = tokenize(args, &tok1);
+    args = tokenize(args, &tok2);
+    args = tokenize(args, &tok3);
+    args = tokenize(args, &tok4);
+
+    if (!tok1 || !tok2 || !tok3 || !tok4) {
+        fprintf(stderr, "L%d: (E) Too few arguments for .margin\n",
+            st->linenum);
+        return;
+    }
+
+    cfg->margint = strtol(tok1, NULL, 0);
+    cfg->marginl = strtol(tok2, NULL, 0);
+    cfg->marginb = strtol(tok3, NULL, 0);
+    cfg->marginr = strtol(tok4, NULL, 0);
+}
+
+void
 cmd_title(const char *args, state_t *st, docconfig_t *cfg) {
     args = strip(args);
     const char *end = strchr(args, '\n');
@@ -178,6 +198,8 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
         cmd_header(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".footer", cmdlen) == 0)
         cmd_footer(cmd + cmdlen, st, cfg);
+    else if (strncmp(cmd, ".margin", cmdlen) == 0)
+        cmd_margin(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".title", cmdlen) == 0)
         cmd_title(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".author", cmdlen) == 0)
@@ -186,6 +208,10 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
         cmd_date(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".titlepage", cmdlen) == 0)
         cmd_titlepage(cmd + cmdlen, e);
+    else if (strncmp(cmd, ".pagebreak", cmdlen) == 0)
+        cmd_pagebreak(e);
+    else if (strncmp(cmd, ".tableofcontents", cmdlen) == 0)
+        cmd_tableofcontents(e);
     else if (strncmp(cmd, ".part", cmdlen) == 0)
         cmd_part(cmd + cmdlen, e);
     else if (strncmp(cmd, ".chapter", cmdlen) == 0)
@@ -196,10 +222,9 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
         cmd_subsection(cmd + cmdlen, e);
     else if (strncmp(cmd, ".subsubsection", cmdlen) == 0)
         cmd_subsubsection(cmd + cmdlen, e);
-    else if (strncmp(cmd, ".pagebreak", cmdlen) == 0)
-        cmd_pagebreak(e);
-    else if (strncmp(cmd, ".tableofcontents", cmdlen) == 0)
-        cmd_tableofcontents(e);
+    else if (strncmp(cmd, ".align", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".columns", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
     else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
     else if (strncmp(cmd, ".enumerate", cmdlen) == 0) {}
     else if (strncmp(cmd, ".item", cmdlen) == 0) {}

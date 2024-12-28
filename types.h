@@ -5,7 +5,8 @@
 
 /* Typesetting config for document */
 typedef struct {
-    int pagewidth, pageheight, tabstop, indentparagraph;
+    int pagewidth, pageheight, tabstop, indentparagraph, margint, marginl,
+        marginb, marginr;
     char *headerl, *headerc, *headerr, *footerl, *footerc, *footerr;
     char *title, *author, *date;
 } docconfig_t;

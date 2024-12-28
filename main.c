@@ -67,21 +67,10 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
 }
 
 
-int
-main(int argc, char **argv) {
-    if (argc != 2) {
-        usage(*argv);
-        exit(1);
-    }
-
-    docconfig_t cfg = { 0 };
-    docentry_t *doc = doc_new();
-    parse_file(argv[1], &cfg, doc);
-
-
-    /* debug */
+void
+doc_print(const docentry_t *doc) {
     int c = 0;
-    for (docentry_t *e = doc; e != NULL; e = e->n, c++) {
+    for (const docentry_t *e = doc; e != NULL; e = e->n, c++) {
         printf(" doc[%d]: %s", c, entrytype_names[e->type]);
         switch (e->type) {
             case ENULL: break;
@@ -98,6 +87,40 @@ main(int argc, char **argv) {
         }
         putchar('\n');
     }
+}
+
+void
+docconfig_print(const docconfig_t *cfg) {
+    printf(
+        "doc config:\n page dimensions: %dx%d\n tabstop: %s\n"
+        " indent paragraphs: %d\n margins: %d %d %d %d\n"
+        " header: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
+        " footer: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
+        " title: %s\n author: %s\n date: %s\n",
+        cfg->pagewidth, cfg->pageheight, cfg->tabstop ? "true" : "false",
+        cfg->indentparagraph, cfg->margint, cfg->marginl, cfg->marginb,
+            cfg->marginr,
+        cfg->headerl, cfg->headerc, cfg->headerr,
+        cfg->footerl, cfg->footerc, cfg->footerr,
+        cfg->title, cfg->author, cfg->date
+    );
+}
+
+int
+main(int argc, char **argv) {
+    if (argc != 2) {
+        usage(*argv);
+        exit(1);
+    }
+
+    docconfig_t cfg = { 0 };
+    docentry_t *doc = doc_new();
+    parse_file(argv[1], &cfg, doc);
+
+
+    /* debug */
+    doc_print(doc); 
+    docconfig_print(&cfg);
 
     return 0;
 }

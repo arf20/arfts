@@ -46,7 +46,15 @@ warns:
 
 Same as .header
 
-## Title page
+### .margin \<t> \<l> \<b> \<r>
+
+Default all 0
+
+
+## Document structure
+
+Structures of the same level end when the next begins. From top level to
+bottom level:
 
 ### .title \<str>
 
@@ -58,10 +66,14 @@ Same as .header
 
 Generates title page with title, [author] and [date]
 
-## Document structure
+### .pagebreak
 
-Structures of the same level end when the next begins. From top level to
-bottom level:
+Inserts form feed
+
+### .tableofcontents
+
+Generates a table of contents page(s) from the document structure commands and
+pages
 
 ### .part \<str>
 
@@ -84,19 +96,9 @@ Generates subsection heading
 Generates sub-sub-section heading
 
 
-### .pagebreak
-
-Inserts form feed
-
-
-### .tableofcontents
-
-Generates a table of contents page(s) from the document structure commands and
-pages
-
 ## Formatting
 
-### .align justify left | center | right
+### .align justify | left | center | right
 
 Default justify
 
@@ -106,10 +108,6 @@ Default single column
 
  - n: columns [default 1]
  - m: column spacing (spaces between them) [default 4]
-
-### .margin \<t> \<l> \<b> \<r>
-
-Default all 0
 
 ## Lists
 
@@ -151,6 +149,21 @@ Cell
 
 Preformat block for whatever
 
+## Bibliography
+
+### .bibliography
+
+Inserts bibliography section page(s)
+
+### .refdef \<refname> \<idk ill figure it out later>
+
+Defines bibliography entry to be inserted at .bibliography
+
+### .footnotedef \<footnotename> \<text>
+
+Defines foot note to be inserted at the bottom of the page where it is
+.footnote'ed after body before footer
+
 ## Inline commands
 
 Also starts by '.' but may be inside a paragraph.
@@ -170,19 +183,4 @@ Inserts superscript reference to bibliography
 ### .footnote \<footnotename>
 
 Inserts superscript reference to foot note
-
-### .footnotedef \<footnotename> \<text>
-
-Defines foot note to be inserted at the bottom of the page where it is
-.footnote'ed after body before footer
-
-## Bibliography
-
-### .bibliography
-
-Inserts bibliography section page(s)
-
-### .refdef \<refname> \<idk ill figure it out later>
-
-Defines bibliography entry to be inserted at .bibliography
 
