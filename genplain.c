@@ -4,6 +4,8 @@
 #include <string.h>
 #include <limits.h>
 
+#include "util.h"
+
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
 /* layout computation */
@@ -158,7 +160,7 @@ print_header(const docconfig_t *cfg, int page, FILE *o) {
     static char pagenumbuff[16], pagenumextbuff[16];
     char *line = malloc(cfg->pagewidth + 1);
     memset(line, ' ', cfg->pagewidth);
-    line[cfg->pagewidth + 1] = '\0';
+    line[cfg->pagewidth] = '\0';
 
     snprintf(pagenumbuff, 16, "%d", page);
     snprintf(pagenumextbuff, 16, "PAGE %d", page);
@@ -328,7 +330,8 @@ print_tableofcontents(const docconfig_t *cfg, int width, int height,
         charc++;
 
         /* print title */
-        charc += fprintf(o, "%s", es->heading);
+        fprintf(o, "%s", es->heading);
+        charc += count_utf8_code_points(es->heading);
         fputc(' ', o);
         charc++;
 
@@ -337,6 +340,7 @@ print_tableofcontents(const docconfig_t *cfg, int width, int height,
         int numlen = snprintf(pagenum, 16, "%d", e->page);
         for (int i = 0; i < width - charc - numlen - 1; i++)
             fputc('.', o);
+        fputc(' ', o);
 
         /* print page num */
         fputs(pagenum, o);

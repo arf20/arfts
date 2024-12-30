@@ -75,13 +75,14 @@ doc_add_word(docentry_t *e, state_t *st, const char *wordoff) {
     if (wordoff[wordlen] == '\n')
         st->linenum++;
     
-    if (e->size + wordlen + 1 > e->capacity) {
+    if (e->size + wordlen + 2 > e->capacity) {
         e->data = realloc(e->data, e->capacity * 2);
         e->capacity *= 2;
     }
 
     strncpy(e->data + e->size, wordoff, wordlen);
     e->data[e->size + wordlen] = ' ';
+    e->data[e->size + wordlen + 1] = '\0';
     e->size += wordlen + 1;
 
     return wordoff + wordlen;

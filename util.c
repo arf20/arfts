@@ -10,7 +10,8 @@ strip(const char *s) {
     return s;
 }
 
-const char *tokenize(const char *s, char **tok) {
+const char *
+tokenize(const char *s, char **tok) {
     s = strip(s);
     const char *end = NULL;
 
@@ -34,5 +35,14 @@ const char *tokenize(const char *s, char **tok) {
             *tok = NULL;
         return end;
     }
+}
+
+size_t
+count_utf8_code_points(const char *s) {
+    size_t count = 0;
+    while (*s) {
+        count += (*s++ & 0xC0) != 0x80;
+    }
+    return count;
 }
 
