@@ -49,6 +49,8 @@ void
 compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
     int page = 1, line = 0;
 
+    docentry_t *l = NULL;
+
     for (docentry_t *e = doc; e != NULL; e = e->n) {
         switch (e->type) {
             case EPARAGRAPH: {
@@ -57,6 +59,11 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 if (line + e->height > height) {
                     page++;
                     line = 0;
+
+                    if (l && l->type == ESTRUCTURE) {
+                        l->page = page;
+                        line = 2;
+                    }
                 }
                 e->page = page;
                 e->line = line;
@@ -70,7 +77,7 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 }
                 line += 2;
 
-                e->page = page; /* set page for tableofcontents */
+                e->page = page; /* set page */
 
             } break;
             case ETITLEPAGE: e->page = page++; line = 0; break;
@@ -86,6 +93,8 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 e->page = page;
             } break;
         }
+
+        l = e;
     }
 }
 
@@ -420,28 +429,11 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
 
     compute_layout(cfg, width, height, doc);
 
-    int linec = 0;
-    
     for (const docentry_t *e = doc; e != NULL; e = e->n) {
-        /* end page, next one */
-        if (linec + e->height >= height) {
-            linec = 0;
-            print_marginb(cfg, o);
-            if (cfg->footerl)
-                print_footer(cfg, e->page, o);
-
-            print_pb(o);
-        }
-
-        if (linec == 0 && cfg->headerl) {
-            print_header(cfg, e->page, o);
-            print_margint(cfg, o);
-        }
-    
         switch (e->type) {
             case EPARAGRAPH: {
                 print_paragraph(cfg, width, e, o);
-                linec += e->height + 1; /* interparagraph margin */
+                //linec += e->height + 1; /* interparagraph margin */
             } break;
             case ESTRUCTURE: {
                 static int indices[] = { 0, 0, 0, 0, 0 };
@@ -451,22 +443,33 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
                     indices[i] = 0;
 
                 print_structure(cfg, width, toplvl, indices, e, o);
-                linec += e->height; 
+                //linec += e->height; 
 
             } break;
             case ETITLEPAGE: {
                 print_titlepage(cfg, width, height, e, o);
-                linec = height; /* force new page */
+                //linec = height; /* force new page */
             } break;
             case ETABLEOFCONTENTS: {
                 print_tableofcontents(cfg, width, height, toplvl, e, doc, o);
-                linec = height; /* force new page */
+                //linec = height; /* force new page */
             } break;
             case ENULL: break;
             case EPREFORMAT: break;
             case EPAGEBREAK: {
-                linec = height;
+                //linec = height;
             } break;
+        }
+
+        /* end page, next one */
+        if (e->n && (e->page < e->n->page)) {
+            print_marginb(cfg, o);
+            if (cfg->footerl)
+                print_footer(cfg, e->page, o);
+            print_pb(o);
+            if (cfg->headerl)
+                print_header(cfg, e->page, o);
+            print_margint(cfg, o);
         }
     }
 }

@@ -69,8 +69,6 @@ doc config:
  title: PRÁCTICA TEMAS 2 Y 3  MEMORIA PROYECTO BUSCADOR AED1
  author: Ángel Ruiz Fernandez, 23836363Z; Carla Ramos García, 23951487T; G2.2
  date: Nov, 2024
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 1
-
 
 
 
@@ -94,7 +92,7 @@ MEMORIA PROYECTO BUSCADOR                                                 PAGE 1
      Ángel Ruiz Fernandez, 23836363Z; Carla Ramos García, 23951487T; G2.2
                                    Nov, 2024
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 2
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 1
 
 TABLE OF CONTENTS
 1. Envios de Mooshak ......................................................... 3
@@ -119,7 +117,7 @@ TABLE OF CONTENTS
 4. Informe de desarrollo ..................................................... 5
 5. Conclusiones y valoraciones personales .................................... 6
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 3
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 2
 
 1. Envios de Mooshak
 
@@ -181,7 +179,7 @@ más lenta.
 2.5.2. Función de dispersión
 
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 4
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 3
 
     Al principio mientras probaba, sumaba todos los caracteres en un entero y 
 aplicaba el módulo, esto conlleva una dispersión bastante mala ya que las 
@@ -243,7 +241,7 @@ main().
     No se usa ningún tipo de variable ni constante global.  
 
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 5
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 4
 
 2.8. ChatGPT
 
@@ -307,7 +305,7 @@ herramienta callgrind de valgrind, muy util. Solo se tuvo que modificar el
 módulo diccionario para este problema.  
 
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 6
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 5
 
     En el 300, se definió el nodo del árbol, y la clase Árbol, de tipo trie 
 (descrito en 1.6.1.). el struct nodo_trie_t tiene 2 miembros, un vector de 
@@ -372,7 +370,7 @@ sus habilidades en el proceso.
 5. Conclusiones y valoraciones personales
 
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 7
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 6
 
     Al principio los problemas resultaron fáciles, pero a partir de la tabla 
 de dispersión y el árbol, hubo que emplear bastante tiempo depurando y 
