@@ -25,6 +25,7 @@ const char *structuretype_names[] = {
 docentry_t*
 doc_new() {
     docentry_t *newdoc = malloc(sizeof(docentry_t));
+    memset(newdoc, 0, sizeof(docentry_t));
     newdoc->type = ENULL;
     newdoc->n = NULL;
     return newdoc;
@@ -36,6 +37,7 @@ doc_insert_null(docentry_t *e) {
         return e;
 
     docentry_t *newe = malloc(sizeof(docentry_t));
+    memset(newe, 0, sizeof(docentry_t));
     newe->type = ENULL;
     newe->n = NULL;
     newe->height = 0;
@@ -52,6 +54,7 @@ doc_insert_paragraph(docentry_t *e) {
         newe = e;
     } else {
         newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
         newe->n = NULL;
         e->n = newe;
     }
@@ -95,6 +98,7 @@ doc_insert_titlepage(docentry_t *e) {
         newe = e;
     } else {
         newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
         newe->n = NULL;
         e->n = newe;
     }
@@ -110,6 +114,7 @@ doc_insert_structure(docentry_t *e, structuretype_t type, const char *heading) {
         newe = e;
     } else {
         newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
         newe->n = NULL;
         e->n = newe;
     }
@@ -133,6 +138,7 @@ doc_insert_pagebreak(docentry_t *e) {
         newe = e;
     } else {
         newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
         newe->n = NULL;
         e->n = newe;
     }
@@ -149,6 +155,7 @@ doc_insert_tableofcontents(docentry_t *e) {
         newe = e;
     } else {
         newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
         newe->n = NULL;
         e->n = newe;
     }

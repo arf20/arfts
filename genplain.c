@@ -13,7 +13,7 @@
 int
 paragraph_countlines(int width, int indent, int tabstop, const docentry_t *p) {
     const char *s = p->data, *next;
-    int linec = 0, charc = 0;
+    int linec = 1, charc = 0;
     while (s) {
         next = strchr(s, ' ');
         if (!next) {
@@ -47,7 +47,6 @@ tableofcontents_countlines(int width, const docentry_t *doc)  {
 
 void
 compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
-    
     int page = 1, line = 0;
 
     for (docentry_t *e = doc; e != NULL; e = e->n) {
@@ -425,7 +424,7 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
     
     for (const docentry_t *e = doc; e != NULL; e = e->n) {
         /* end page, next one */
-        if (linec >= height) {
+        if (linec + e->height >= height) {
             linec = 0;
             print_marginb(cfg, o);
             if (cfg->footerl)
@@ -442,7 +441,7 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
         switch (e->type) {
             case EPARAGRAPH: {
                 print_paragraph(cfg, width, e, o);
-                linec += e->height; 
+                linec += e->height + 1; /* interparagraph margin */
             } break;
             case ESTRUCTURE: {
                 static int indices[] = { 0, 0, 0, 0, 0 };
@@ -457,16 +456,16 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
             } break;
             case ETITLEPAGE: {
                 print_titlepage(cfg, width, height, e, o);
-                linec = INT_MAX; /* force new page */
+                linec = height; /* force new page */
             } break;
             case ETABLEOFCONTENTS: {
                 print_tableofcontents(cfg, width, height, toplvl, e, doc, o);
-                linec = INT_MAX; /* force new page */
+                linec = height; /* force new page */
             } break;
             case ENULL: break;
             case EPREFORMAT: break;
             case EPAGEBREAK: {
-                linec = INT_MAX;
+                linec = height;
             } break;
         }
     }

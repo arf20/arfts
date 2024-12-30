@@ -114,9 +114,9 @@ TABLE OF CONTENTS
         2.6.3. Referencia a paginas .......................................... 4
         2.6.4. Liberacion .................................................... 4
     2.7. Globales ............................................................ 4
-    2.8. ChatGPT ............................................................. 4
-3. Listado completo del código ............................................... 4
-4. Informe de desarrollo ..................................................... 4
+    2.8. ChatGPT ............................................................. 5
+3. Listado completo del código ............................................... 5
+4. Informe de desarrollo ..................................................... 5
 5. Conclusiones y valoraciones personales .................................... 6
 
 MEMORIA PROYECTO BUSCADOR                                                 PAGE 3
@@ -129,13 +129,7 @@ TABLE OF CONTENTS
 
 2.1. Clases
 
-    aqui va una enumeracion y figura funcionamiento de un motor de
-búsqueda 
-real.
-
-
-
- 
+    aqui va una enumeracion y figura  
 
 2.2. Módulos
 
@@ -186,6 +180,9 @@ más lenta.
 
 2.5.2. Función de dispersión
 
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 4
+
     Al principio mientras probaba, sumaba todos los caracteres en un entero y 
 aplicaba el módulo, esto conlleva una dispersión bastante mala ya que las 
 cadenas son de longitudes parecidas.  
@@ -213,9 +210,6 @@ de salir del programa, gracias a RAII de C++.
 2.6. Árbol
 
 2.6.1. Tipo
-
-
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 4
 
     Se ha implementado un árbol Trie, ya que es muy simple de implementar, y 
 lo bastante rápido para la aplicación. Buscar como máximo 26 elementos por 
@@ -247,6 +241,9 @@ main().
 2.7. Globales
 
     No se usa ningún tipo de variable ni constante global.  
+
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 5
 
 2.8. ChatGPT
 
@@ -310,7 +307,7 @@ herramienta callgrind de valgrind, muy util. Solo se tuvo que modificar el
 módulo diccionario para este problema.  
 
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 5
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 6
 
     En el 300, se definió el nodo del árbol, y la clase Árbol, de tipo trie 
 (descrito en 1.6.1.). el struct nodo_trie_t tiene 2 miembros, un vector de 
@@ -373,6 +370,9 @@ proyecto, sino que también permitió que Carla Ramos aprendiera y mejorara
 sus habilidades en el proceso.  
 
 5. Conclusiones y valoraciones personales
+
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 7
 
     Al principio los problemas resultaron fáciles, pero a partir de la tabla 
 de dispersión y el árbol, hubo que emplear bastante tiempo depurando y 
