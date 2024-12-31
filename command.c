@@ -194,11 +194,11 @@ cmd_align(const char *args, state_t *st, docentry_config_t *ecfg) {
 }
 
 void
-cmd_fig(const char *args, state_t *st, docentry_t **e) {
+cmd_fig(const char *args, state_t *st, docentry_config_t ecfg, docentry_t **e) {
     args = strip(args);
     const char *end = strchr(args, '\n');
     st->in_fig = 1;
-    *e = doc_insert_figure(*e, strndup(args, end - args));
+    *e = doc_insert_figure(*e, ecfg, strndup(args, end - args));
 }
 
 const char*
@@ -264,7 +264,7 @@ interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
     else if (strncmp(cmd, ".th", cmdlen) == 0) {}
     else if (strncmp(cmd, ".td", cmdlen) == 0) {}
     else if (strncmp(cmd, ".fig", cmdlen) == 0)
-        cmd_fig(cmd + cmdlen, st, e);
+        cmd_fig(cmd + cmdlen, st, *ecfg, e);
     else if (strncmp(cmd, ".!fig", cmdlen) == 0) {}
     else if (strncmp(cmd, ".bibliography", cmdlen) == 0) {}
     else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}

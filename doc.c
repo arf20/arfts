@@ -47,7 +47,7 @@ doc_insert_null(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_paragraph(docentry_t *e) {
+doc_insert_paragraph(docentry_t *e, docentry_config_t ecfg) {
     docentry_t *newe = NULL;
     if (e->type == ENULL) {
         /* morph curr null entry into a paragraph */
@@ -59,6 +59,7 @@ doc_insert_paragraph(docentry_t *e) {
         e->n = newe;
     }
     newe->type = EPARAGRAPH;
+    newe->ecfg = ecfg;
 
     newe->data = malloc(EPARAGRAPH_INITIAL_CAPACITY);
     newe->capacity = EPARAGRAPH_INITIAL_CAPACITY;
@@ -166,7 +167,7 @@ doc_insert_tableofcontents(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_figure(docentry_t *e, const char *caption) {
+doc_insert_figure(docentry_t *e, docentry_config_t ecfg, const char *caption) {
     docentry_t *newe = NULL;
     if (e->type == ENULL) {
         newe = e;
@@ -177,6 +178,7 @@ doc_insert_figure(docentry_t *e, const char *caption) {
         e->n = newe;
     }
     newe->type = EFIGURE;
+    newe->ecfg = ecfg;
     newe->height = 0;
     newe->data = malloc(newe->size = sizeof(docentry_figure_t));
     

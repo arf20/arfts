@@ -69,7 +69,7 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
         else {
             /* body word */
             if (cur_entry->type != EPARAGRAPH)
-                cur_entry = doc_insert_paragraph(cur_entry);
+                cur_entry = doc_insert_paragraph(cur_entry, ecfg);
 
             cursor = doc_add_word(cur_entry, &st, cursor);
 

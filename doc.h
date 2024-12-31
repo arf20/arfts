@@ -69,14 +69,15 @@ typedef struct {
 
 docentry_t *doc_new();
 docentry_t *doc_insert_null(docentry_t *e);
-docentry_t *doc_insert_paragraph(docentry_t *e);
+docentry_t *doc_insert_paragraph(docentry_t *e, docentry_config_t ecfg);
 const char *doc_add_word(docentry_t *e, state_t *st, const char *wordoff);
 docentry_t *doc_insert_titlepage(docentry_t *e);
 docentry_t *doc_insert_structure(docentry_t *e, structuretype_t type,
     const char *heading);
 docentry_t *doc_insert_pagebreak(docentry_t *e);
 docentry_t *doc_insert_tableofcontents(docentry_t *e);
-docentry_t *doc_insert_figure(docentry_t *e, const char *caption);
+docentry_t *doc_insert_figure(docentry_t *e, docentry_config_t ecfg,
+    const char *caption);
 const char *doc_read_figure(docentry_t *e, state_t *st, const char *figoff);
  
 

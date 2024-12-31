@@ -111,11 +111,12 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                         col++;
                 }
 
-                if (line + e->height) {
+                if (line + e->height >= height) {
                     page++;
                     line = 0;
                 }
 
+                line += e->height;
                 e->page = page;
             } break;
         }
