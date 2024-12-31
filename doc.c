@@ -7,7 +7,7 @@
 const char *entrytype_names[] = {
     "null",
     "paragraph",
-    "preformat",
+    "figure",
     "structure",
     "titlepage",
     "pagebreak",
@@ -163,5 +163,41 @@ doc_insert_tableofcontents(docentry_t *e) {
     newe->height = 0;
 
     return newe;
+}
+
+docentry_t*
+doc_insert_figure(docentry_t *e, const char *caption) {
+    docentry_t *newe = NULL;
+    if (e->type == ENULL) {
+        newe = e;
+    } else {
+        newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
+        newe->n = NULL;
+        e->n = newe;
+    }
+    newe->type = EFIGURE;
+    newe->height = 0;
+    newe->data = malloc(newe->size = sizeof(docentry_figure_t));
+    
+    ((docentry_figure_t*)e->data)->caption = caption;
+
+    return newe;
+}
+
+const char*
+doc_read_figure(docentry_t *e, state_t *st, const char *figoff) {
+    const char *end = strstr(figoff, ".!fig");
+    if (!end) {
+        fprintf(stderr, "L%d: No matching .!fig for .fig", st->linenum);
+        return NULL;
+    }
+
+    ((docentry_figure_t*)e->data)->predata = 
+        strndup(figoff, end - figoff);
+
+    st->in_fig = 0;
+
+    return end + 5;
 }
 

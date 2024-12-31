@@ -5,7 +5,7 @@
 
 /* Typesetting config for document */
 typedef struct {
-    int pagewidth, pageheight, tabstop, indentparagraph, margint, marginl,
+    int pagewidth, pageheight, tabstop, margint, marginl,
         marginb, marginr;
     char *headerl, *headerc, *headerr, *footerl, *footerc, *footerr;
     char *title, *author, *date;
@@ -13,7 +13,7 @@ typedef struct {
 
 /* Reader state */
 typedef struct {
-    int linenum, prev_nl, in_pre;
+    int linenum, prev_nl, in_fig;
 } state_t;
 
 

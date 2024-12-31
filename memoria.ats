@@ -4,7 +4,7 @@
 .margin 1 0 1 0
 .indentparagraph on
 .header "MEMORIA PROYECTO BUSCADOR" pagenumext
-
+.align left
 
 .title PRÁCTICA TEMAS 2 Y 3  MEMORIA PROYECTO BUSCADOR AED1
 .date Nov, 2024
@@ -25,6 +25,36 @@ aqui va una tabla
 .subsection Clases
 
 aqui va una enumeracion y figura
+
+.fig Diagrama de clases
+             +--------+
+             | Pagina |
+             +--------+
+                  |
+      +-----------+-------------+
+      V                         |
++-----------+                   |
+| PagListIt |                   |
++-----------+                   |
+  |       |                     |
+  |       |       +----+        |
+  |       V       V    |        |
+  |   +-------------+  |        |
+  |   | nodo_trie_t |  |        |
+  |   +-------------+  |        |
+  |       |       |    |        |
+  +---+---+       +----+        |
+      V                         |
+  +-------+                     |
+  | Árbol |                     |
+  +-------+                     |
+      |                         |
+      +------------+------------+
+                   V
+            +-------------+
+            + Diccionario |
+            +-------------+
+.!fig
 
 .subsection Módulos
 

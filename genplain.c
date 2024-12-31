@@ -54,7 +54,7 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
     for (docentry_t *e = doc; e != NULL; e = e->n) {
         switch (e->type) {
             case EPARAGRAPH: {
-                e->height = paragraph_countlines(width, cfg->indentparagraph,
+                e->height = paragraph_countlines(width, e->ecfg.indentparagraph,
                     cfg->tabstop, e);
                 if (line + e->height > height) {
                     page++;
@@ -78,18 +78,44 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 line += 2;
 
                 e->page = page; /* set page */
+                e->line = line;
+                e->height = 2;
 
             } break;
             case ETITLEPAGE: e->page = page++; line = 0; break;
             case ETABLEOFCONTENTS: {
                 e->page = page;
+                e->line = line;
                 int toclines = tableofcontents_countlines(width, doc);
                 page += (toclines / height) + ((toclines % height) != 0);
                 line = 0;
+                e->height = toclines;
             } break;
             case EPAGEBREAK: {
                 page++;
                 line = 0;
+                e->page = page;
+                e->line = 0;
+            } break;
+            case EFIGURE: {
+                docentry_figure_t *ef = (docentry_figure_t*)e->data;
+                e->height = 1;
+                int col = 0;
+                for (const char *f = ef->predata; *f; f++) {
+                    if (*f == '\n') {
+                        e->height++;
+                        if (col > e->width)
+                            e->width = col + 1;
+                        col = 0;
+                    } else
+                        col++;
+                }
+
+                if (line + e->height) {
+                    page++;
+                    line = 0;
+                }
+
                 e->page = page;
             } break;
         }
@@ -386,7 +412,7 @@ print_paragraph(const docconfig_t *cfg, int width, const docentry_t *par,
     print_marginl(cfg, o);
 
     /* indent */
-    if (cfg->indentparagraph)
+    if (par->ecfg.indentparagraph)
         print_tab(cfg, o);
 
     while (s) {
@@ -400,7 +426,7 @@ print_paragraph(const docconfig_t *cfg, int width, const docentry_t *par,
 
         charc += wlen + 1;
 
-        if ((charc >= width) || (linec == 0 && cfg->indentparagraph &&
+        if ((charc >= width) || (linec == 0 && par->ecfg.indentparagraph &&
             charc + cfg->tabstop >= width))
         {
             linec++;
@@ -419,6 +445,37 @@ print_paragraph(const docconfig_t *cfg, int width, const docentry_t *par,
 }
 
 void
+print_figure(const docconfig_t *cfg, int width, int fignum,
+const docentry_t *fig, FILE *o)
+{
+    docentry_figure_t *ef = (docentry_figure_t*)fig->data;
+    const char *line = ef->predata;
+
+    while (line && *line) {
+        if (*line == '\n') {
+            line++;
+            continue;
+        }
+        int linelen = strpbrk(line, "\n\0") - line;
+
+        print_marginl(cfg, o);
+        if (fig->ecfg.indentparagraph)
+            print_tab(cfg, o);
+        fprintf(o, "%.*s\n", linelen, line);
+
+        line += linelen;
+    }
+
+    if (ef->caption && *ef->caption) {
+        print_marginl(cfg, o);
+        if (fig->ecfg.indentparagraph)
+            print_tab(cfg, o);
+        fprintf(o, "Fig %d. %s\n", fignum, ef->caption);
+    }
+    print_lf(o);
+}
+
+void
 generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
     int width = cfg->pagewidth - cfg->marginl - cfg->marginr;
     int height = cfg->pageheight - cfg->margint - cfg->marginb;
@@ -431,6 +488,7 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
 
     for (const docentry_t *e = doc; e != NULL; e = e->n) {
         switch (e->type) {
+            case ENULL: break;
             case EPARAGRAPH: {
                 print_paragraph(cfg, width, e, o);
                 //linec += e->height + 1; /* interparagraph margin */
@@ -454,8 +512,11 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
                 print_tableofcontents(cfg, width, height, toplvl, e, doc, o);
                 //linec = height; /* force new page */
             } break;
-            case ENULL: break;
-            case EPREFORMAT: break;
+            case EFIGURE: {
+                int fignum = 1;
+                print_figure(cfg, width, fignum, e, o);
+                fignum++;
+            } break;
             case EPAGEBREAK: {
                 //linec = height;
             } break;

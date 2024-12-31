@@ -23,12 +23,12 @@ cmd_tabstop(const char *args, state_t *st, docconfig_t *cfg) {
 }
 
 void
-cmd_indentparagraph(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_indentparagraph(const char *args, state_t *st, docentry_config_t *ecfg) {
     args = strip(args);
     if (strncmp(args, "on", 2) == 0)
-        cfg->indentparagraph = 1;
+        ecfg->indentparagraph = 1;
     else
-        cfg->indentparagraph = 0;
+        ecfg->indentparagraph = 0;
 }
 
 void
@@ -173,9 +173,37 @@ cmd_tableofcontents(docentry_t **e) {
     *e = doc_insert_tableofcontents(*e);
 }
 
+void
+cmd_align(const char *args, state_t *st, docentry_config_t *ecfg) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    int arglen = end - args;
+
+    if (strncmp(args, "justify", arglen) == 0) {
+        ecfg->align = AJUSTIFY;
+    } else if (strncmp(args, "left", arglen) == 0) {
+        ecfg->align = ALEFT;
+    } else if (strncmp(args, "center", arglen) == 0) {
+        ecfg->align = ACENTER;
+    } else if (strncmp(args, "right", arglen) == 0) {
+        ecfg->align = ARIGHT;
+    } else {
+        fprintf(stderr, "L%d: Unrecognized option %.*s for .align\n",
+            st->linenum, arglen, args);
+    }
+}
+
+void
+cmd_fig(const char *args, state_t *st, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    st->in_fig = 1;
+    *e = doc_insert_figure(*e, strndup(args, end - args));
+}
+
 const char*
-interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
-    docentry_t **e)
+interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
+    state_t *st, docentry_t **e)
 {
     const char *cmdend = strpbrk(cmd, " \n");
     int cmdlen = cmdend - cmd;
@@ -193,7 +221,7 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     else if (strncmp(cmd, ".tabstop", cmdlen) == 0)
         cmd_tabstop(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".indentparagraph", cmdlen) == 0)
-        cmd_indentparagraph(cmd + cmdlen, st, cfg);
+        cmd_indentparagraph(cmd + cmdlen, st, ecfg);
     else if (strncmp(cmd, ".header", cmdlen) == 0)
         cmd_header(cmd + cmdlen, st, cfg);
     else if (strncmp(cmd, ".footer", cmdlen) == 0)
@@ -222,8 +250,10 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
         cmd_subsection(cmd + cmdlen, e);
     else if (strncmp(cmd, ".subsubsection", cmdlen) == 0)
         cmd_subsubsection(cmd + cmdlen, e);
-    else if (strncmp(cmd, ".align", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".columns", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".align", cmdlen) == 0)
+        cmd_align(cmd + cmdlen, st, ecfg);
+    else if (strncmp(cmd, ".columns", cmdlen) == 0)
+        /* todo */ {}
     else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
     else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
     else if (strncmp(cmd, ".enumerate", cmdlen) == 0) {}
@@ -233,7 +263,8 @@ interpret_command(const char *cmd, docconfig_t *cfg, state_t *st,
     else if (strncmp(cmd, ".!tr", cmdlen) == 0) {}
     else if (strncmp(cmd, ".th", cmdlen) == 0) {}
     else if (strncmp(cmd, ".td", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".fig", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".fig", cmdlen) == 0)
+        cmd_fig(cmd + cmdlen, st, e);
     else if (strncmp(cmd, ".!fig", cmdlen) == 0) {}
     else if (strncmp(cmd, ".bibliography", cmdlen) == 0) {}
     else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}

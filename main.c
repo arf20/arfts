@@ -33,15 +33,28 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
     fclose(f);
 
     const char *cursor = src;
+
     state_t st = { 0 };
     st.linenum = 1;
+
     docentry_t *cur_entry = doc; /* current document entry */
-    while (*cursor) {
+
+    docentry_config_t ecfg = {
+        .align = ALEFT,
+        .indentparagraph = 1
+    };
+
+    while (cursor && *cursor) {
+        if (st.in_fig) {
+            cursor = doc_read_figure(cur_entry, &st, cursor);
+            continue;
+        }
+
         cursor = strip(cursor);
 
         if (*cursor == '.') {
             /* command */
-            cursor = interpret_command(cursor, cfg, &st, &cur_entry);
+            cursor = interpret_command(cursor, cfg, &ecfg, &st, &cur_entry);
         } else if (*cursor == '\n') {
             cursor++;
             st.linenum++;
@@ -76,7 +89,10 @@ doc_print(const docentry_t *doc) {
         switch (e->type) {
             case ENULL: break;
             case EPARAGRAPH: printf(" \"%.*s\"", (int)e->size, e->data); break;
-            case EPREFORMAT: break;
+            case EFIGURE: {
+                docentry_figure_t *ef = (docentry_figure_t*)e->data;
+                printf(" \"%s\" {\n%s\n}", ef->caption, ef->predata);
+            } break;
             case ESTRUCTURE: {
                 docentry_structure_t *es = (docentry_structure_t*)e->data;
                 printf(": %s \"%s\"", structuretype_names[es->type],
@@ -94,13 +110,12 @@ void
 docconfig_print(const docconfig_t *cfg) {
     printf(
         "doc config:\n page dimensions: %dx%d\n tabstop: %s\n"
-        " indent paragraphs: %d\n margins: %d %d %d %d\n"
+        " margins: %d %d %d %d\n"
         " header: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
         " footer: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
         " title: %s\n author: %s\n date: %s\n",
         cfg->pagewidth, cfg->pageheight, cfg->tabstop ? "true" : "false",
-        cfg->indentparagraph, cfg->margint, cfg->marginl, cfg->marginb,
-            cfg->marginr,
+        cfg->margint, cfg->marginl, cfg->marginb, cfg->marginr,
         cfg->headerl, cfg->headerc, cfg->headerr,
         cfg->footerl, cfg->footerc, cfg->footerr,
         cfg->title, cfg->author, cfg->date
