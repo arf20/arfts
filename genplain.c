@@ -514,9 +514,10 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
                 //linec = height; /* force new page */
             } break;
             case EFIGURE: {
-                int fignum = 1;
+                static int fignum = 1;
                 print_figure(cfg, width, fignum, e, o);
-                fignum++;
+                if (strlen(((docentry_figure_t*)e->data)->caption) > 0)
+                    fignum++;
             } break;
             case EPAGEBREAK: {
                 //linec = height;

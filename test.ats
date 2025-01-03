@@ -37,4 +37,27 @@ silly text asd askdfk df owo
 
 ids fsid fsiu fiiufeiueiuf eqiuiuewiueq heqiur oi
 
+.fig Figure with text
+   A
+  A A
+ A A A
+.!fig
+
+now another paragraph
+
+.fig
+BBB
+B  B
+BBB
+B  B 
+BBB
+.!fig
+
+.fig now with text again
+      CCC
+     C
+    C
+     C
+      CCC
+.!fig
 
