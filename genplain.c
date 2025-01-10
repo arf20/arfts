@@ -455,6 +455,7 @@ const docentry_t *fig, FILE *o)
     while (line && *line) {
         if (*line == '\n') {
             line++;
+            print_lf(o);
             continue;
         }
         int linelen = strpbrk(line, "\n\0") - line;
@@ -462,7 +463,7 @@ const docentry_t *fig, FILE *o)
         print_marginl(cfg, o);
         if (fig->ecfg.indentparagraph)
             print_tab(cfg, o);
-        fprintf(o, "%.*s\n", linelen, line);
+        fprintf(o, "%.*s", linelen, line);
 
         line += linelen;
     }

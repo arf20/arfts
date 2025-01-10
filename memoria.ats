@@ -54,11 +54,36 @@ aqui va una enumeracion y figura
             +-------------+
             + Diccionario |
             +-------------+
+
 .!fig
 
 .subsection Módulos
 
 aqui va una enumeracion y figura
+
+.fig Diagrama de modulos
+                                            +-----------------+
+                                            | diccionario.hpp |
+                                            +-----------------+
+                                                    ^
+                                                    |
+      +---------------------+-----------------------+
+      |                     |                       |
+      |             +----------------+      +-----------------+
+      |             | interprete.hpp |      | diccionario.cpp |
+      |             +----------------+      +-----------------+
+      |                     ^
+      |                     |
+      +---------------------+
+      |                     |
++----------+        +----------------+
+| main.cpp |        | interprete.cpp |
++----------+        +----------------+
+
+main.o              interprete.o            diccionario.o
+
+.!fig
+
 
 .subsection Makefile
 
