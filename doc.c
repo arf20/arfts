@@ -11,7 +11,8 @@ const char *entrytype_names[] = {
     "structure",
     "titlepage",
     "pagebreak",
-    "tableofcontents"
+    "tableofcontents",
+    "list"
 };
 
 const char *structuretype_names[] = {
@@ -47,7 +48,7 @@ doc_insert_null(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_paragraph(docentry_t *e, docentry_config_t ecfg) {
+doc_insert_paragraph(docentry_t *e, docentry_config_t *ecfg) {
     docentry_t *newe = NULL;
     if (e->type == ENULL) {
         /* morph curr null entry into a paragraph */
@@ -59,7 +60,7 @@ doc_insert_paragraph(docentry_t *e, docentry_config_t ecfg) {
         e->n = newe;
     }
     newe->type = EPARAGRAPH;
-    newe->ecfg = ecfg;
+    newe->ecfg = *ecfg;
 
     newe->data = malloc(EPARAGRAPH_INITIAL_CAPACITY);
     newe->capacity = EPARAGRAPH_INITIAL_CAPACITY;
@@ -67,29 +68,6 @@ doc_insert_paragraph(docentry_t *e, docentry_config_t ecfg) {
     newe->height = 0;
 
     return newe;
-}
-
-const char*
-doc_add_word(docentry_t *e, state_t *st, const char *wordoff) {
-    if (e->type != EPARAGRAPH)
-        return wordoff;
-
-    int wordlen = strpbrk(wordoff, " \n") - wordoff;
-
-    if (wordoff[wordlen] == '\n')
-        st->linenum++;
-    
-    if (e->size + wordlen + 2 > e->capacity) {
-        e->data = realloc(e->data, e->capacity * 2);
-        e->capacity *= 2;
-    }
-
-    strncpy(e->data + e->size, wordoff, wordlen);
-    e->data[e->size + wordlen] = ' ';
-    e->data[e->size + wordlen + 1] = '\0';
-    e->size += wordlen + 1;
-
-    return wordoff + wordlen;
 }
 
 docentry_t*
@@ -167,7 +145,9 @@ doc_insert_tableofcontents(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_figure(docentry_t *e, docentry_config_t ecfg, const char *caption) {
+doc_insert_figure(docentry_t *e, const docentry_config_t *ecfg,
+const char *caption)
+{
     docentry_t *newe = NULL;
     if (e->type == ENULL) {
         newe = e;
@@ -178,28 +158,51 @@ doc_insert_figure(docentry_t *e, docentry_config_t ecfg, const char *caption) {
         e->n = newe;
     }
     newe->type = EFIGURE;
-    newe->ecfg = ecfg;
+    newe->ecfg = *ecfg;
     newe->height = 0;
     newe->data = malloc(newe->size = sizeof(docentry_figure_t));
+    newe->size = newe->capacity = sizeof(docentry_figure_t);
     
     ((docentry_figure_t*)e->data)->caption = caption;
 
     return newe;
 }
 
-const char*
-doc_read_figure(docentry_t *e, state_t *st, const char *figoff) {
-    const char *end = strstr(figoff, ".!fig");
-    if (!end) {
-        fprintf(stderr, "L%d: No matching .!fig for .fig", st->linenum);
-        return NULL;
+docentry_t*
+doc_insert_list(docentry_t *e, const docentry_config_t *ecfg, list_type_t type,
+    const char *caption)
+{
+    docentry_t *newe = NULL;
+    if (e->type == ENULL) {
+        newe = e;
+    } else {
+        newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
+        newe->n = NULL;
+        e->n = newe;
     }
+    newe->type = ELIST;
+    newe->ecfg = *ecfg;
+    newe->height = 0;
+    newe->data = malloc(newe->size = sizeof(docentry_list_t));
+    newe->size = newe->capacity = sizeof(docentry_list_t);
+    
+    docentry_list_t* el = (docentry_list_t*)e->data;
+    el->type = type;
+    el->caption = caption;
+    el->count = 0;
+    el->items = NULL;
 
-    ((docentry_figure_t*)e->data)->predata = 
-        strndup(figoff, end - figoff);
+    return newe;
+}
 
-    st->in_fig = 0;
-
-    return end + 5;
+void
+doc_list_insert(docentry_t *e, const char *text) {
+    if (e->type != ELIST)
+        return;
+    docentry_list_t* el = (docentry_list_t*)e->data;
+    el->count++;
+    el->items = realloc(el->items, sizeof(char*) * el->count);
+    el->items[el->count - 1] = text;
 }
 

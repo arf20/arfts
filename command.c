@@ -194,12 +194,41 @@ cmd_align(const char *args, state_t *st, docentry_config_t *ecfg) {
 }
 
 void
-cmd_fig(const char *args, state_t *st, docentry_config_t ecfg, docentry_t **e) {
+cmd_fig(const char *args, state_t *st, const docentry_config_t *ecfg,
+    docentry_t **e)
+{
     args = strip(args);
     const char *end = strchr(args, '\n');
     st->in_fig = 1;
     *e = doc_insert_figure(*e, ecfg, strndup(args, end - args));
 }
+
+void
+cmd_itemize(const char *args, state_t *st, const docentry_config_t *ecfg,
+    docentry_t **e)
+{
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_list(*e, ecfg, LITEMIZE, strndup(args, end - args));
+}
+
+void
+cmd_enumerate(const char *args, state_t *st, const docentry_config_t *ecfg,
+    docentry_t **e)
+{
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    *e = doc_insert_list(*e, ecfg, LENUMERATE, strndup(args, end - args));
+}
+
+void
+cmd_item(const char *args, state_t *st, docentry_t **e) {
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    doc_list_insert(*e, strndup(args, end - args));
+}
+
+
 
 const char*
 interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
@@ -254,17 +283,19 @@ interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
         cmd_align(cmd + cmdlen, st, ecfg);
     else if (strncmp(cmd, ".columns", cmdlen) == 0)
         /* todo */ {}
-    else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".itemize", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".enumerate", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".item", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".itemize", 8) == 0)
+        cmd_itemize(cmd + cmdlen, st, ecfg, e);
+    else if (strncmp(cmd, ".enumerate", cmdlen) == 0)
+        cmd_enumerate(cmd + cmdlen, st, ecfg, e);
+    else if (strncmp(cmd, ".item", cmdlen) == 0)
+        cmd_item(cmd + cmdlen, st, e);
     else if (strncmp(cmd, ".table", cmdlen) == 0) {}
     else if (strncmp(cmd, ".tr", cmdlen) == 0) {}
     else if (strncmp(cmd, ".!tr", cmdlen) == 0) {}
     else if (strncmp(cmd, ".th", cmdlen) == 0) {}
     else if (strncmp(cmd, ".td", cmdlen) == 0) {}
     else if (strncmp(cmd, ".fig", cmdlen) == 0)
-        cmd_fig(cmd + cmdlen, st, *ecfg, e);
+        cmd_fig(cmd + cmdlen, st, ecfg, e);
     else if (strncmp(cmd, ".!fig", cmdlen) == 0) {}
     else if (strncmp(cmd, ".bibliography", cmdlen) == 0) {}
     else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}

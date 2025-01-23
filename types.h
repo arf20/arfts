@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
+#include "doc.h"
+
 /* Typesetting config for document */
 typedef struct {
     int pagewidth, pageheight, tabstop, margint, marginl,

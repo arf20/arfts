@@ -13,6 +13,47 @@ usage(char *argv0) {
     printf("usage: %s <file>\n\n", argv0);
 }
 
+const char*
+read_figure(docentry_t *e, state_t *st, const char *figoff) {
+    if (e->type != EFIGURE)
+        return figoff;
+
+    const char *end = strstr(figoff, ".!fig");
+    if (!end) {
+        fprintf(stderr, "L%d: No matching .!fig for .fig", st->linenum);
+        return NULL;
+    }
+
+    ((docentry_figure_t*)e->data)->predata = 
+        strndup(figoff, end - figoff);
+
+    st->in_fig = 0;
+
+    return end + 5;
+}
+
+const char*
+add_word(docentry_t *e, state_t *st, const char *wordoff) {
+    if (e->type != EPARAGRAPH)
+        return wordoff;
+
+    int wordlen = strpbrk(wordoff, " \n") - wordoff;
+
+    if (wordoff[wordlen] == '\n')
+        st->linenum++;
+    
+    if (e->size + wordlen + 2 > e->capacity) {
+        e->data = realloc(e->data, e->capacity * 2);
+        e->capacity *= 2;
+    }
+
+    strncpy(e->data + e->size, wordoff, wordlen);
+    e->data[e->size + wordlen] = ' ';
+    e->data[e->size + wordlen + 1] = '\0';
+    e->size += wordlen + 1;
+
+    return wordoff + wordlen;
+}
 
 void
 parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
@@ -46,7 +87,7 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
 
     while (cursor && *cursor) {
         if (st.in_fig) {
-            cursor = doc_read_figure(cur_entry, &st, cursor);
+            cursor = read_figure(cur_entry, &st, cursor);
             continue;
         }
 
@@ -69,9 +110,9 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
         else {
             /* body word */
             if (cur_entry->type != EPARAGRAPH)
-                cur_entry = doc_insert_paragraph(cur_entry, ecfg);
+                cur_entry = doc_insert_paragraph(cur_entry, &ecfg);
 
-            cursor = doc_add_word(cur_entry, &st, cursor);
+            cursor = add_word(cur_entry, &st, cursor);
 
             st.prev_nl = 0;
         }
@@ -97,6 +138,13 @@ doc_print(const docentry_t *doc) {
                 docentry_structure_t *es = (docentry_structure_t*)e->data;
                 printf(": %s \"%s\"", structuretype_names[es->type],
                     es->heading);
+            } break;
+            case ELIST: {
+                docentry_list_t* el = (docentry_list_t*)e->data;
+                putchar('\n');
+                for (size_t i = 0; i < el->count; i++)
+                    printf("-> %s\n", el->items[i]);
+
             } break;
             case ETITLEPAGE: break;
             case EPAGEBREAK: break;
