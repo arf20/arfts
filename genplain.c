@@ -119,6 +119,19 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 line += e->height;
                 e->page = page;
             } break;
+            case ELIST: {
+                docentry_list_t* el = (docentry_list_t*)e->data;
+                e->height = 0;
+                if (el->caption[0] == '\0')
+                    e->height++;
+                e->height += el->count;
+
+                if (line + e->height >= height) {
+                    page++;
+                    line = 0;
+                }
+                
+            } break;
         }
 
         l = e;
@@ -478,6 +491,20 @@ const docentry_t *fig, FILE *o)
 }
 
 void
+print_list(const docconfig_t *cfg, int width, const docentry_t *e, FILE *o) {
+    docentry_list_t* el = (docentry_list_t*)e->data;
+    if (el->caption[0] != '\0')
+        fprintf(o, "%s\n", el->caption);
+    for (int i = 0; i < el->count; i++) {
+        if (el->type == LITEMIZE)
+            fprintf(o, "%*c- %s\n", cfg->tabstop - 2, ' ', el->items[i]);
+        else
+            fprintf(o, "%*c%d. %s\n", cfg->tabstop - 3, ' ', i + 1, el->items[i]);
+
+    }
+}
+
+void
 generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
     int width = cfg->pagewidth - cfg->marginl - cfg->marginr;
     int height = cfg->pageheight - cfg->margint - cfg->marginb;
@@ -522,6 +549,9 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
             } break;
             case EPAGEBREAK: {
                 //linec = height;
+            } break;
+            case ELIST: {
+                print_list(cfg, width, e, o);
             } break;
         }
 
