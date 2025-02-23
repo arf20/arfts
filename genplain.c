@@ -209,8 +209,10 @@ print_centered_text_lf(const char *l, int width, FILE *o) {
 const char *
 print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
     txt = strip(txt);
+    if (*txt == '\0') return txt;
     int lwlen = 0, llen = 0, gaps = 0;
     const char *pos = txt;
+    /* count words that fit in the line */
     while (pos != (void*)1 && *pos != '\0') {
         const char *next = strpbrk(pos, " \0");
         int wlen = count_utf8_code_points_n(pos, next - pos);
@@ -221,6 +223,8 @@ print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
         gaps++;
         pos = next + 1;
     }
+    lwlen--; /* no ending space */
+    llen--;
 
     switch (ecfg->align) {
         case ALEFT: fprintf(o, "%.*s", llen, txt); break;
