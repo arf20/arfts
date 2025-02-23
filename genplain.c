@@ -237,13 +237,13 @@ print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
             fprintf(o, "%.*s", llen, txt);
         } break;
         case AJUSTIFY: {
-            int tspacing = width - lwlen;
+            int tspacing = width - lwlen + gaps;
             float spacingpergap = (float)tspacing / (float)gaps;
             float t = 0.0f;
             lwlen = 0;
             const char *pos = txt;
             while (pos != (void*)1) {
-                const char *next = strpbrk(txt, " \0");
+                const char *next = strpbrk(pos, " \0");
                 int wlen = next - pos;
                 if (lwlen + wlen > width)
                     break;

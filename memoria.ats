@@ -4,7 +4,7 @@
 .margin 1 0 1 0
 .indentparagraph on
 .header "MEMORIA PROYECTO BUSCADOR" pagenumext
-.align right
+.align justify
 
 .title PRÁCTICA TEMAS 2 Y 3  MEMORIA PROYECTO BUSCADOR AED1
 .date Nov, 2024
