@@ -38,6 +38,15 @@ tokenize(const char *s, char **tok) {
 }
 
 size_t
+count_utf8_code_points_n(const char *s, size_t n) {
+    size_t count = 0;
+    for (size_t i = 0; i < n && *s; i++) {
+        count += (*s++ & 0xC0) != 0x80;
+    }
+    return count;
+}
+
+size_t
 count_utf8_code_points(const char *s) {
     size_t count = 0;
     while (*s) {

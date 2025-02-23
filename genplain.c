@@ -164,43 +164,101 @@ print_pb(FILE *o) {
 }
 
 void
+print_n_c(char c, int n, FILE *o) {
+   for (int i = 0; i < n; i++)
+       fputc(c, o);
+}
+
+void
 print_tab(const docconfig_t *cfg, FILE *o) {
-    for (int i = 0; i < cfg->tabstop; i++)
-        fputc(' ', o);
+    print_n_c(' ', cfg->tabstop, o);
 }
 
 void
 print_marginl(const docconfig_t *cfg, FILE *o) {
-    for (int i = 0; i < cfg->marginl; i++)
-        fputc(' ', o);
+    print_n_c(' ', cfg->marginl, o);
 }
 
 void
 print_margint(const docconfig_t *cfg, FILE *o) {
-    for (int i = 0; i < cfg->margint; i++)
-        fputc('\n', o);
+    print_n_c('\n', cfg->margint, o);
 }
 
 void
 print_marginb(const docconfig_t *cfg, FILE *o) {
-    for (int i = 0; i < cfg->marginb; i++)
-        fputc('\n', o);
+    print_n_c('\n', cfg->marginb, o);
 }
 
 void
-print_ln(const char *l, FILE *o) {
+print_text_lf(const char *l, FILE *o) {
     fputs(l, o);
     print_lf(o);
 }
 
 void
-print_ln_center(const char *l, int width, FILE *o) {
+print_centered_text_lf(const char *l, int width, FILE *o) {
     int len = strlen(l);
     int spacel = (width - len) / 2;
     for (int i = 0; i < spacel; i++)
         fputc(' ', o);
     fputs(l, o);
     print_lf(o);
+}
+
+/* consumes one line of width */
+const char *
+print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
+    txt = strip(txt);
+    int lwlen = 0, llen = 0, gaps = 0;
+    const char *pos = txt;
+    while (pos != (void*)1 && *pos != '\0') {
+        const char *next = strpbrk(pos, " \0");
+        int wlen = count_utf8_code_points_n(pos, next - pos);
+        if (lwlen + wlen > width)
+            break;
+        lwlen += wlen + 1;
+        llen += next - pos + 1;
+        gaps++;
+        pos = next + 1;
+    }
+
+    switch (ecfg->align) {
+        case ALEFT: fprintf(o, "%.*s", llen, txt); break;
+        case ARIGHT: {
+            print_n_c(' ', width - lwlen, o);
+            fprintf(o, "%.*s", llen, txt);
+        } break;
+        case ACENTER: {
+            print_n_c(' ', (width - lwlen) / 2, o);
+            fprintf(o, "%.*s", llen, txt);
+        } break;
+        case AJUSTIFY: {
+            int tspacing = width - lwlen;
+            float spacingpergap = (float)tspacing / (float)gaps;
+            float t = 0.0f;
+            lwlen = 0;
+            const char *pos = txt;
+            while (pos != (void*)1) {
+                const char *next = strpbrk(txt, " \0");
+                int wlen = next - pos;
+                if (lwlen + wlen > width)
+                    break;
+                lwlen += wlen;
+                fprintf(o, "%.*s", wlen, pos);
+                if ((int)t != (int)(t + spacingpergap))
+                    fputc(' ', o);
+
+
+                pos = next + 1;
+                t += spacingpergap;
+            }
+
+        } break;
+    }
+
+    print_lf(o);
+
+    return txt + llen;
 }
 
 void
@@ -259,7 +317,7 @@ print_header(const docconfig_t *cfg, int page, FILE *o) {
             MIN(strlen(headerr), cfg->pagewidth - spacel));
     }
 
-    print_ln(line, o);
+    print_text_lf(line, o);
     free(line);
 }
 
@@ -319,7 +377,7 @@ print_footer(const docconfig_t *cfg, int page, FILE *o) {
             MIN(strlen(footerr), cfg->pagewidth - spacel));
     }
 
-    print_ln(line, o);
+    print_text_lf(line, o);
     free(line);
 }
 
@@ -334,11 +392,11 @@ print_titlepage(const docconfig_t *cfg, int width, int height,
         print_lf(o);
 
     print_marginl(cfg, o);
-    print_ln_center(cfg->title, width, o);
+    print_centered_text_lf(cfg->title, width, o);
     print_marginl(cfg, o);
-    print_ln_center(cfg->author, width, o);
+    print_centered_text_lf(cfg->author, width, o);
     print_marginl(cfg, o);
-    print_ln_center(cfg->date, width, o);
+    print_centered_text_lf(cfg->date, width, o);
 }
 
 void
@@ -346,7 +404,7 @@ print_tableofcontents(const docconfig_t *cfg, int width, int height,
     int toplvl, const docentry_t *toc, const docentry_t *doc, FILE *o)
 {
     print_marginl(cfg, o);
-    print_ln("TABLE OF CONTENTS", o);
+    print_text_lf("TABLE OF CONTENTS", o);
 
     int indices[] = {
         0, 0, 0, 0, 0 /* part, chapter, section, subsection, subsubsection */
@@ -410,51 +468,33 @@ print_structure(const docconfig_t *cfg, int width, int toplvl, int indices[5],
         fprintf(o, "%d.", indices[i]);
     fputc(' ', o);
 
-    print_ln(((const docentry_structure_t*)e->data)->heading, o);
+    print_text_lf(((const docentry_structure_t*)e->data)->heading, o);
 
     print_lf(o);
 }
 
-/* todo alignment */
 void
 print_paragraph(const docconfig_t *cfg, int width, const docentry_t *par,
     FILE *o)
 {
-    const char *s = par->data, *next;
-    int linec = 0, charc = 0, wlen;
+    const char *s = par->data;
 
     print_marginl(cfg, o);
 
     /* indent */
-    if (par->ecfg.indentparagraph)
-        print_tab(cfg, o);
-
-    while (s) {
-        next = strchr(s, ' ');
-        if (!next) {
-            wlen = strlen(s);
-            next = (const char *)-1;
-        }
-        else
-            wlen = (next - s); /* 1 space */
-
-        charc += wlen + 1;
-
-        if ((charc >= width) || (linec == 0 && par->ecfg.indentparagraph &&
-            charc + cfg->tabstop >= width))
-        {
-            linec++;
-            charc = wlen + 1;
-            print_lf(o);
-            print_marginl(cfg, o);
-        }
-
-        fprintf(o, "%.*s ", wlen, s);
- 
-        s = next + 1;
+    int firstlnw = width;
+    if (par->ecfg.indentparagraph && par->ecfg.align != ACENTER) {
+        if (par->ecfg.align != ARIGHT)
+            print_tab(cfg, o);
+        firstlnw = width - cfg->tabstop;
     }
 
-    print_lf(o);
+    s = print_ln(s, &par->ecfg, firstlnw, o);
+    while (s && *s) {
+        print_marginl(cfg, o);
+        s = print_ln(s, &par->ecfg, width, o);
+    }
+
     print_lf(o);
 }
 
@@ -496,11 +536,13 @@ print_list(const docconfig_t *cfg, int width, const docentry_t *e, FILE *o) {
     if (el->caption[0] != '\0')
         fprintf(o, "%s\n", el->caption);
     for (int i = 0; i < el->count; i++) {
-        if (el->type == LITEMIZE)
-            fprintf(o, "%*c- %s\n", cfg->tabstop - 2, ' ', el->items[i]);
-        else
-            fprintf(o, "%*c%d. %s\n", cfg->tabstop - 3, ' ', i + 1, el->items[i]);
-
+        if (el->type == LITEMIZE) {
+            print_n_c(' ', cfg->tabstop - 2, o);
+            fprintf(o, "- %s\n", el->items[i]);
+        } else {
+            print_n_c(' ', cfg->tabstop - 3, o);
+            fprintf(o, "%d. %s\n", i + 1, el->items[i]);
+        }
     }
 }
 
