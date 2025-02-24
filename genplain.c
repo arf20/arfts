@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 
 #include "util.h"
 
@@ -225,6 +226,7 @@ print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
     }
     lwlen--; /* no ending space */
     llen--;
+    gaps--;
 
     switch (ecfg->align) {
         case ALEFT: fprintf(o, "%.*s", llen, txt); break;
@@ -239,22 +241,23 @@ print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
         case AJUSTIFY: {
             int tspacing = width - lwlen + gaps;
             float spacingpergap = (float)tspacing / (float)gaps;
-            float t = 0.0f;
-            lwlen = 0;
+            int linepos = 0, cc = 0, wc = 0;
             const char *pos = txt;
             while (pos != (void*)1) {
                 const char *next = strpbrk(pos, " \0");
-                int wlen = next - pos;
-                if (lwlen + wlen > width)
+                int wlen = count_utf8_code_points_n(pos, next - pos);
+                if (linepos + wlen > width)
                     break;
-                lwlen += wlen;
-                fprintf(o, "%.*s", wlen, pos);
-                if ((int)t != (int)(t + spacingpergap))
-                    fputc(' ', o);
+                linepos += wlen;
+                cc += wlen;
+                wc++;
+                fprintf(o, "%.*s", (int)(next - pos), pos);
 
+                int nextspacing = (cc + roundf((float)wc * spacingpergap)) - linepos;
+                print_n_c(' ', nextspacing, o);
+                linepos += nextspacing;
 
                 pos = next + 1;
-                t += spacingpergap;
             }
 
         } break;

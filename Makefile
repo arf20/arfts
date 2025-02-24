@@ -2,7 +2,7 @@ PROJECT := arfts
 BINARY := arfts
 CC := gcc
 CFLAGS := -Wall -pedantic -g -O0
-LDFLAGS := 
+LDFLAGS := -lm 
 
 SRC := $(wildcard *.c)
 HDR := $(wildcard *.h)
