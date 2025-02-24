@@ -33,7 +33,7 @@ read_figure(docentry_t *e, state_t *st, const char *figoff) {
 }
 
 const char*
-add_word(docentry_t *e, state_t *st, const char *wordoff) {
+paragraph_add_word(docentry_t *e, state_t *st, const char *wordoff) {
     if (e->type != EPARAGRAPH)
         return wordoff;
 
@@ -51,6 +51,32 @@ add_word(docentry_t *e, state_t *st, const char *wordoff) {
     e->data[e->size + wordlen] = ' ';
     e->data[e->size + wordlen + 1] = '\0';
     e->size += wordlen + 1;
+
+    return wordoff + wordlen;
+}
+
+const char*
+item_add_word(docentry_t *e, state_t *st, const char *wordoff) {
+    if (e->type != ELIST)
+        return wordoff;
+    
+    docentry_list_t *el = (docentry_list_t*)e->data;
+    docentry_list_item_t *li = &el->items[el->count - 1];
+
+    int wordlen = strpbrk(wordoff, " \n") - wordoff;
+
+    if (wordoff[wordlen] == '\n')
+        st->linenum++;
+    
+    if (li->size + wordlen + 2 > li->capacity) {
+        li->content = realloc(li->content, li->capacity * 2);
+        li->capacity *= 2;
+    }
+
+    strncpy(li->content + li->size, wordoff, wordlen);
+    li->content[li->size + wordlen] = ' ';
+    li->content[li->size + wordlen + 1] = '\0';
+    li->size += wordlen + 1;
 
     return wordoff + wordlen;
 }
@@ -102,17 +128,23 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
 
             if (st.prev_nl) {
                 /* break paragraph */
+                st.in_item = 0;
                 cur_entry = doc_insert_null(cur_entry);
             }
 
             st.prev_nl = 1;
         }
         else {
-            /* body word */
-            if (cur_entry->type != EPARAGRAPH)
-                cur_entry = doc_insert_paragraph(cur_entry, &ecfg);
+            /* item word */
+            if (st.in_item) {
+                cursor = item_add_word(cur_entry, &st, cursor);
 
-            cursor = add_word(cur_entry, &st, cursor);
+            } else {
+                /* body word */
+                if (cur_entry->type != EPARAGRAPH)
+                    cur_entry = doc_insert_paragraph(cur_entry, &ecfg);
+                cursor = paragraph_add_word(cur_entry, &st, cursor);
+            }
 
             st.prev_nl = 0;
         }
@@ -126,37 +158,40 @@ void
 doc_print(const docentry_t *doc) {
     int c = 0;
     for (const docentry_t *e = doc; e != NULL; e = e->n, c++) {
-        printf(" doc[%d]: %s", c, entrytype_names[e->type]);
+        fprintf(stderr, " doc[%d,%d]: %s",
+            e->page, c, entrytype_names[e->type]);
         switch (e->type) {
             case ENULL: break;
-            case EPARAGRAPH: printf(" \"%.*s\"", (int)e->size, e->data); break;
+            case EPARAGRAPH: {
+                fprintf(stderr, " \"%.*s\"", (int)e->size, e->data);
+            } break;
             case EFIGURE: {
                 docentry_figure_t *ef = (docentry_figure_t*)e->data;
-                printf(" \"%s\" {\n%s\n}", ef->caption, ef->predata);
+                fprintf(stderr, " \"%s\" {\n%s\n}", ef->caption, ef->predata);
             } break;
             case ESTRUCTURE: {
                 docentry_structure_t *es = (docentry_structure_t*)e->data;
-                printf(": %s \"%s\"", structuretype_names[es->type],
+                fprintf(stderr, ": %s \"%s\"", structuretype_names[es->type],
                     es->heading);
             } break;
             case ELIST: {
                 docentry_list_t* el = (docentry_list_t*)e->data;
-                putchar('\n');
+                fputc('\n', stderr);
                 for (size_t i = 0; i < el->count; i++)
-                    printf("-> %s\n", el->items[i]);
+                    fprintf(stderr, "-> %s\n", el->items[i].content);
 
             } break;
             case ETITLEPAGE: break;
             case EPAGEBREAK: break;
             case ETABLEOFCONTENTS: break;
         }
-        putchar('\n');
+        fputc('\n', stderr);
     }
 }
 
 void
 docconfig_print(const docconfig_t *cfg) {
-    printf(
+    fprintf(stderr,
         "doc config:\n page dimensions: %dx%d\n tabstop: %s\n"
         " margins: %d %d %d %d\n"
         " header: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
@@ -181,13 +216,12 @@ main(int argc, char **argv) {
     docentry_t *doc = doc_new();
     parse_file(argv[1], &cfg, doc);
 
+    generate_plain(&cfg, doc, stdout);
 
     /* debug */
     doc_print(doc); 
     docconfig_print(&cfg);
 
-
-    generate_plain(&cfg, doc, stdout);
 
     return 0;
 }

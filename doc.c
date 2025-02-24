@@ -197,12 +197,15 @@ doc_insert_list(docentry_t *e, const docentry_config_t *ecfg, list_type_t type,
 }
 
 void
-doc_list_insert(docentry_t *e, const char *text) {
+doc_list_insert(docentry_t *e) {
     if (e->type != ELIST)
         return;
     docentry_list_t* el = (docentry_list_t*)e->data;
     el->count++;
-    el->items = realloc(el->items, sizeof(char*) * el->count);
-    el->items[el->count - 1] = text;
+    el->items = realloc(el->items, sizeof(docentry_list_item_t) * el->count);
+    docentry_list_item_t *li = &el->items[el->count - 1];
+    li->size = 0;
+    li->capacity = EPARAGRAPH_INITIAL_CAPACITY;
+    li->content = malloc(EPARAGRAPH_INITIAL_CAPACITY);
 }
 

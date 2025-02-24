@@ -24,28 +24,28 @@ aqui va una tabla
 
 .subsection Clases
 
-.enumerate
-
-.item class Pagina
+.itemize
+.item
+class Pagina
 Representa una página, almacena su url, titulo, relevancia y contenido.
-
-.item class PagListIt : public std::list<Pagina>::iterator
+.item
+class PagListIt : public std::list<Pagina>::iterator
 Usa Pagina
 Iterador heredado que implementa el operador '<' para poder ser ordenado
 en un contenedor ordenado.
 Representa una referencia a elemento de std::list<Pagina>
-
-.item struct nodo_trie_t
+.item
+struct nodo_trie_t
 Usa PagListIt
 Representa un nodo del árbol trie de palabras. De este cuelgan hijos en un
 diccionario <char, nodo_trie_t>. Relaciona con una lista de referencias a
 página (PagListIt).
-
-.item class Árbol
+.item
+class Árbol
 Usa PagListIt y nodo_trie_t
 Contiene la estructura árbol oculta, y posibles operaciones sobre el.
-
-.item class Diccionario
+.item
+class Diccionario
 Usa Pagina, PagListIt y Árbol
 Contiene la estructura de tabla de dispersión (std::list<Pagina>[N]),
 su función de hash, y una instancia de Árbol.

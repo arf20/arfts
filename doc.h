@@ -75,10 +75,15 @@ typedef enum {
 } list_type_t;
 
 typedef struct {
+    int size, capacity;
+    char *content;
+} docentry_list_item_t;
+
+typedef struct {
     list_type_t type;
     const char *caption;
     size_t count;
-    const char **items;
+    docentry_list_item_t *items;
 } docentry_list_t;
 
 
@@ -94,7 +99,7 @@ docentry_t *doc_insert_figure(docentry_t *e, const docentry_config_t *ecfg,
     const char *caption);
 docentry_t *doc_insert_list(docentry_t *e, const docentry_config_t *ecfg,
     list_type_t type, const char *caption);
-void doc_list_insert(docentry_t *e, const char *text);
+void doc_list_insert(docentry_t *e);
 
 #endif /* _DOC_H */
 

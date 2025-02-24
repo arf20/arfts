@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <limits.h>
 
 const char *
 strip(const char *s) {
@@ -53,5 +54,16 @@ count_utf8_code_points(const char *s) {
         count += (*s++ & 0xC0) != 0x80;
     }
     return count;
+}
+
+int
+num_places(int n) {
+    int r = 1;
+    if (n < 0) n = (n == INT_MIN) ? INT_MAX: -n;
+    while (n > 9) {
+        n /= 10;
+        r++;
+    }
+    return r;
 }
 

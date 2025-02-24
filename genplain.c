@@ -7,8 +7,6 @@
 
 #include "util.h"
 
-#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-
 /* layout computation */
 
 int
@@ -131,7 +129,8 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                     page++;
                     line = 0;
                 }
-                
+
+                e->page = page;
             } break;
         }
 
@@ -540,17 +539,31 @@ const docentry_t *fig, FILE *o)
 void
 print_list(const docconfig_t *cfg, int width, const docentry_t *e, FILE *o) {
     docentry_list_t* el = (docentry_list_t*)e->data;
+    print_marginl(cfg, o);
     if (el->caption[0] != '\0')
         fprintf(o, "%s\n", el->caption);
     for (int i = 0; i < el->count; i++) {
+        print_marginl(cfg, o);
+        int fltab = 0;
         if (el->type == LITEMIZE) {
-            print_n_c(' ', cfg->tabstop - 2, o);
-            fprintf(o, "- %s\n", el->items[i]);
+            fltab = MAX(0, cfg->tabstop - 2);
+            print_n_c(' ', fltab, o);
+            fltab += fprintf(o, "- ");
         } else {
-            print_n_c(' ', cfg->tabstop - 3, o);
-            fprintf(o, "%d. %s\n", i + 1, el->items[i]);
+            fltab = MAX(0, cfg->tabstop - 2 - num_places(i + 1));
+            print_n_c(' ', fltab, o);
+            fltab += fprintf(o, "%d. ", i + 1);
         }
+        const char *s = el->items[i].content;
+        s = print_ln(s, &e->ecfg, width - fltab, o);
+        while (s && *s) {
+            print_marginl(cfg, o);
+            print_tab(cfg, o);
+            s = print_ln(s, &e->ecfg, width - cfg->tabstop, o);
+        }
+        print_lf(o);
     }
+    print_lf(o);
 }
 
 void
@@ -565,6 +578,12 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
     compute_layout(cfg, width, height, doc);
 
     for (const docentry_t *e = doc; e != NULL; e = e->n) {
+        /* first page header */
+        if (e == doc) {
+            print_header(cfg, e->page, o);
+            print_margint(cfg, o);
+        }
+
         switch (e->type) {
             case ENULL: break;
             case EPARAGRAPH: {
@@ -611,7 +630,7 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
                 print_footer(cfg, e->page, o);
             print_pb(o);
             if (cfg->headerl)
-                print_header(cfg, e->page, o);
+                print_header(cfg, e->n->page, o);
             print_margint(cfg, o);
         }
     }

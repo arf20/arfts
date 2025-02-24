@@ -15,7 +15,7 @@ typedef struct {
 
 /* Reader state */
 typedef struct {
-    int linenum, prev_nl, in_fig;
+    int linenum, prev_nl, in_fig, in_item;
 } state_t;
 
 
