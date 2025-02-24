@@ -229,6 +229,15 @@ cmd_item(const char *args, state_t *st, docentry_t **e) {
     st->in_item = 1;
 }
 
+void
+cmd_table(const char *args, state_t *st, const docentry_config_t *ecfg,
+    docentry_t **e)
+{
+    args = strip(args);
+    const char *end = strchr(args, '\n');
+    st->in_table = 1;
+    *e = doc_insert_table(*e, ecfg, strndup(args, end - args));
+}
 
 
 const char*
@@ -290,11 +299,8 @@ interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
         cmd_enumerate(cmd + cmdlen, st, ecfg, e);
     else if (strncmp(cmd, ".item", cmdlen) == 0)
         cmd_item(cmd + cmdlen, st, e);
-    else if (strncmp(cmd, ".table", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".tr", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".!tr", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".th", cmdlen) == 0) {}
-    else if (strncmp(cmd, ".td", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".table", cmdlen) == 0)
+        cmd_table(cmd + cmdlen, st, ecfg, e);
     else if (strncmp(cmd, ".fig", cmdlen) == 0)
         cmd_fig(cmd + cmdlen, st, ecfg, e);
     else if (strncmp(cmd, ".!fig", cmdlen) == 0) {}

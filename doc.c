@@ -12,7 +12,8 @@ const char *entrytype_names[] = {
     "titlepage",
     "pagebreak",
     "tableofcontents",
-    "list"
+    "list",
+    "table"
 };
 
 const char *structuretype_names[] = {
@@ -163,7 +164,9 @@ const char *caption)
     newe->data = malloc(newe->size = sizeof(docentry_figure_t));
     newe->size = newe->capacity = sizeof(docentry_figure_t);
     
-    ((docentry_figure_t*)e->data)->caption = caption;
+    docentry_figure_t* ef = (docentry_figure_t*)e->data;
+    ef->caption = caption;
+    ef->predata = NULL;
 
     return newe;
 }
@@ -207,5 +210,32 @@ doc_list_insert(docentry_t *e) {
     li->size = 0;
     li->capacity = EPARAGRAPH_INITIAL_CAPACITY;
     li->content = malloc(EPARAGRAPH_INITIAL_CAPACITY);
+}
+
+docentry_t*
+doc_insert_table(docentry_t *e, const docentry_config_t *ecfg,
+const char *caption)
+{
+    docentry_t *newe = NULL;
+    if (e->type == ENULL) {
+        newe = e;
+    } else {
+        newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
+        newe->n = NULL;
+        e->n = newe;
+    }
+    newe->type = ETABLE;
+    newe->ecfg = *ecfg;
+    newe->height = 0;
+    newe->data = malloc(newe->size = sizeof(docentry_table_t));
+    newe->size = newe->capacity = sizeof(docentry_table_t);
+    
+    docentry_table_t* et = (docentry_table_t*)e->data;
+    et->caption = caption;
+    et->ncols = et->nrows = 0;
+    et->cols = NULL;
+
+    return newe;
 }
 

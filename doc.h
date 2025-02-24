@@ -31,7 +31,8 @@ typedef enum {
     ETITLEPAGE,
     EPAGEBREAK,
     ETABLEOFCONTENTS,
-    ELIST
+    ELIST,
+    ETABLE
 } entrytype_t;
 
 extern const char *entrytype_names[];
@@ -87,6 +88,13 @@ typedef struct {
 } docentry_list_t;
 
 
+typedef struct {
+    const char *caption;
+    int ncols, nrows, has_header;
+    char **cols;
+} docentry_table_t;
+
+
 docentry_t *doc_new();
 docentry_t *doc_insert_null(docentry_t *e);
 docentry_t *doc_insert_paragraph(docentry_t *e, docentry_config_t *ecfg);
@@ -100,6 +108,8 @@ docentry_t *doc_insert_figure(docentry_t *e, const docentry_config_t *ecfg,
 docentry_t *doc_insert_list(docentry_t *e, const docentry_config_t *ecfg,
     list_type_t type, const char *caption);
 void doc_list_insert(docentry_t *e);
+docentry_t *doc_insert_table(docentry_t *e, const docentry_config_t *ecfg,
+    const char *caption);
 
 #endif /* _DOC_H */
 

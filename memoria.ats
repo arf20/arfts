@@ -18,7 +18,22 @@
 
 .section Envios de Mooshak
 
-aqui va una tabla
+Cuenta de Ángel Ruiz: B117
+
+.table
+
+| PID | SID  |
+--------------
+| 001 | 437  |
+| 002 | 446  |
+| 003 | 483  |
+| 004 | 546  |
+| 200 | 1057 |
+| 300 | 1947 |
+| 301 | 2071 |
+| 302 | 2072 |
+| 303 | 2076 |
+
 
 .section Análisis del programa
 

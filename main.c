@@ -33,6 +33,14 @@ read_figure(docentry_t *e, state_t *st, const char *figoff) {
 }
 
 const char*
+read_table(docentry_t *e, state_t *st, const char *toff) {
+     if (e->type != ETABLE)
+        return toff;
+
+
+}
+
+const char*
 paragraph_add_word(docentry_t *e, state_t *st, const char *wordoff) {
     if (e->type != EPARAGRAPH)
         return wordoff;
@@ -116,6 +124,11 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
             cursor = read_figure(cur_entry, &st, cursor);
             continue;
         }
+
+        if (st.in_table) {
+            cursor = read_table(cur_entry, &st, cursor);
+            continue;
+        }   
 
         cursor = strip(cursor);
 

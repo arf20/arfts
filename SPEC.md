@@ -111,7 +111,7 @@ Default single column
 
 ## Lists
 
-Ends with paragraph
+Begins list of .items. Ends with two line feeds
 
 ### .itemize
 
@@ -129,19 +129,14 @@ List item
 
 ### .table [table description]
 
-Begins table
+Begins markdown-like table. Ends with two line feeds
 
-### .tr, .!tr
-
-Row
-
-### .th \<str>
-
-Header
-
-### .td \<str>
-
-Cell
+```
+| header1 | header2 |
+---------------------
+| cell1   | cell2   |
+| cell3   | cell4   |
+```
 
 ## Graphics or whatever
 
