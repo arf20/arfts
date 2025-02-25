@@ -234,7 +234,7 @@ const char *caption)
     docentry_table_t* et = (docentry_table_t*)e->data;
     et->caption = caption;
     et->ncols = et->nrows = 0;
-    et->cols = NULL;
+    et->cells = NULL;
 
     return newe;
 }

@@ -277,7 +277,7 @@ interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
         cmd_titlepage(cmd + cmdlen, e);
     else if (strncmp(cmd, ".pagebreak", cmdlen) == 0)
         cmd_pagebreak(e);
-    else if (strncmp(cmd, ".tableofcontents", cmdlen) == 0)
+    else if (strncmp(cmd, ".tableofcontents", 16) == 0)
         cmd_tableofcontents(e);
     else if (strncmp(cmd, ".part", cmdlen) == 0)
         cmd_part(cmd + cmdlen, e);

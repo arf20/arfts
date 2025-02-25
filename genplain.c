@@ -10,7 +10,7 @@
 /* layout computation */
 
 int
-paragraph_countlines(int width, int indent, int tabstop, const docentry_t *p) {
+text_countlines(int width, int indent, int tabstop, const char *text) {
     const char *s = p->data, *next;
     int linec = 1, charc = 0;
     while (s) {
@@ -53,8 +53,8 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
     for (docentry_t *e = doc; e != NULL; e = e->n) {
         switch (e->type) {
             case EPARAGRAPH: {
-                e->height = paragraph_countlines(width, e->ecfg.indentparagraph,
-                    cfg->tabstop, e);
+                e->height = text_countlines(width, e->ecfg.indentparagraph,
+                    cfg->tabstop, e->data);
                 if (line + e->height > height) {
                     page++;
                     line = 0;
@@ -131,6 +131,32 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 }
 
                 e->page = page;
+            } break;
+            case ETABLE: {
+                docentry_table_t* et = (docentry_table_t*)e->data;
+
+                int *colmaxwidth = malloc(sizeof(int) * et->ncols);
+                int *coloverflows =   malloc(sizeof(int) * et->ncols);
+
+                for (int c = 0; c < et->ncols; c++) {
+                    colmaxwidth[c] = 0;
+                    for (int r = 0; r < et->nrows; r++) {
+                        int cellwidth =
+                            strlen(et->cells[(r * et->ncols) + c]) + 1;
+                        if (cellwidth > colmaxwidth[c])
+                            colmaxwidth[c] = cellwidth;
+                    }
+                }
+
+                int sum = 0;
+                for (int c = 0; c < et->ncols; c++)
+                    sum += colmaxwidth[c];
+
+                for (int c = 0; c < et->ncols; c++)
+                    coloverflows = !((sum - colmaxwidth) < width);
+
+
+
             } break;
         }
 

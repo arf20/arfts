@@ -91,7 +91,8 @@ typedef struct {
 typedef struct {
     const char *caption;
     int ncols, nrows, has_header;
-    char **cols;
+    char **cells; /* r*W + c */
+    int *cell_widths, *cell_heights;
 } docentry_table_t;
 
 
