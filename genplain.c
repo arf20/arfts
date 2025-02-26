@@ -11,7 +11,7 @@
 
 int
 text_countlines(int width, int indent, int tabstop, const char *text) {
-    const char *s = p->data, *next;
+    const char *s = text, *next;
     int linec = 1, charc = 0;
     while (s) {
         next = strchr(s, ' ');
@@ -52,6 +52,7 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
 
     for (docentry_t *e = doc; e != NULL; e = e->n) {
         switch (e->type) {
+            case ENULL: break;
             case EPARAGRAPH: {
                 e->height = text_countlines(width, e->ecfg.indentparagraph,
                     cfg->tabstop, e->data);
@@ -135,28 +136,47 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
             case ETABLE: {
                 docentry_table_t* et = (docentry_table_t*)e->data;
 
-                int *colmaxwidth = malloc(sizeof(int) * et->ncols);
-                int *coloverflows =   malloc(sizeof(int) * et->ncols);
+                //int *colmaxwidth = malloc(sizeof(int) * et->ncols);
+                //int *coloverflows =   malloc(sizeof(int) * et->ncols);
 
                 for (int c = 0; c < et->ncols; c++) {
-                    colmaxwidth[c] = 0;
+                    et->cell_widths[c] = 0;
                     for (int r = 0; r < et->nrows; r++) {
                         int cellwidth =
-                            strlen(et->cells[(r * et->ncols) + c]) + 1;
-                        if (cellwidth > colmaxwidth[c])
-                            colmaxwidth[c] = cellwidth;
+                            strlen(et->cells[(r * et->ncols) + c]) - 1;
+                        if (cellwidth > et->cell_widths[c])
+                            et->cell_widths[c] = cellwidth;
                     }
                 }
 
                 int sum = 0;
                 for (int c = 0; c < et->ncols; c++)
-                    sum += colmaxwidth[c];
+                    sum += et->cell_widths[c];
 
-                for (int c = 0; c < et->ncols; c++)
-                    coloverflows = !((sum - colmaxwidth) < width);
+                //for (int c = 0; c < et->ncols; c++)
+                //    coloverflows[c] = !((sum - colmaxwidth[c]) < width);
+
+                if (((3 * et->ncols) + sum + 2) > width) {
+                    float avail = width - (3 * et->ncols) - 2;
+
+                    for (int c = 0; c < et->ncols; c++)
+                        et->cell_widths[c] =
+                            avail * ((float)et->cell_widths[c] / (float)sum);
+                }
 
 
+                for (int r = 0; r < et->nrows; r++) {
+                    et->cell_heights[r] = 0;
+                    for (int c = 0; c < et->ncols; c++) {
+                        int cellheight = text_countlines(et->cell_widths[c],
+                                e->ecfg.indentparagraph, cfg->tabstop,
+                                et->cells[(r * et->ncols) + c]);
+                        if (cellheight > et->cell_heights[r])
+                            et->cell_heights[r] = cellheight;
+                    }
+                }
 
+                e->page = page;
             } break;
         }
 
@@ -233,7 +253,7 @@ print_centered_text_lf(const char *l, int width, FILE *o) {
 
 /* consumes one line of width */
 const char *
-print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
+print_ln_nolf(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
     txt = strip(txt);
     if (*txt == '\0') return txt;
     int lwlen = 0, llen = 0, gaps = 0;
@@ -278,20 +298,32 @@ print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
                 wc++;
                 fprintf(o, "%.*s", (int)(next - pos), pos);
 
-                int nextspacing = (cc + roundf((float)wc * spacingpergap)) - linepos;
-                print_n_c(' ', nextspacing, o);
-                linepos += nextspacing;
+                if (wc < gaps + 1) {
+                    int nextspacing = (cc + roundf((float)wc * spacingpergap)) -
+                        linepos;
+                    print_n_c(' ', nextspacing, o);
+                    linepos += nextspacing;
+                }
 
                 pos = next + 1;
             }
 
+            print_n_c(' ', width - linepos, o);
+
         } break;
     }
 
-    print_lf(o);
 
     return txt + llen;
 }
+
+const char *
+print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
+    const char *r = print_ln_nolf(txt, ecfg, width, o);
+    print_lf(o);
+    return r;
+}
+
 
 void
 print_header(const docconfig_t *cfg, int page, FILE *o) {
@@ -592,6 +624,72 @@ print_list(const docconfig_t *cfg, int width, const docentry_t *e, FILE *o) {
     print_lf(o);
 }
 
+/* table stuff */
+
+void
+print_table_hbar(int ncols, int *col_widths, FILE *o) {
+    for (int c = 0; c < ncols; c++) {
+        fprintf(o, "+-");
+        print_n_c('-', col_widths[c], o);
+        fprintf(o, "-");
+    }
+    fprintf(o, "+\n");
+}
+
+void
+print_table_row(int ncols, int *col_widths, const char **cells,
+    const docentry_config_t *ecfg, FILE *o)
+{
+    for (int c = 0; c < ncols; c++) {
+        fprintf(o, "| ");
+        //fprintf(o, cells[c]);
+        print_ln_nolf(cells[c], ecfg, col_widths[c], o);
+        fprintf(o, " ");
+    }
+    fprintf(o, "|\n");
+}
+
+void
+print_table(const docconfig_t *cfg, int width, int tnum, const docentry_t *e,
+    FILE *o)
+{
+    docentry_table_t* et = (docentry_table_t*)e->data;
+
+    print_marginl(cfg, o);
+    if (e->ecfg.indentparagraph)
+        print_tab(cfg, o);
+    print_table_hbar(et->ncols, et->cell_widths, o);
+    print_marginl(cfg, o);
+    if (e->ecfg.indentparagraph)
+        print_tab(cfg, o);
+    print_table_row(et->ncols, et->cell_widths, (const char **)&et->cells[0],
+        &e->ecfg, o);
+    if (et->has_header) {
+        print_marginl(cfg, o);
+        if (e->ecfg.indentparagraph)
+            print_tab(cfg, o);
+        print_table_hbar(et->ncols, et->cell_widths, o);
+    }
+    for (int r = 1; r < et->nrows; r++) {
+        print_marginl(cfg, o);
+        if (e->ecfg.indentparagraph)
+            print_tab(cfg, o);
+        print_table_row(et->ncols, et->cell_widths,
+            (const char **)&et->cells[r * et->ncols], &e->ecfg, o);
+    }
+    print_marginl(cfg, o);
+    if (e->ecfg.indentparagraph)
+        print_tab(cfg, o);
+    print_table_hbar(et->ncols, et->cell_widths, o);
+    if (et->caption && *et->caption != '\0') {
+        print_marginl(cfg, o);
+         if (e->ecfg.indentparagraph)
+            print_tab(cfg, o);
+        fprintf(o, "Table %d. %s\n", tnum, et->caption);
+    }
+    print_lf(o);
+}
+
 void
 generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
     int width = cfg->pagewidth - cfg->marginl - cfg->marginr;
@@ -646,6 +744,12 @@ generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
             } break;
             case ELIST: {
                 print_list(cfg, width, e, o);
+            } break;
+            case ETABLE: {
+                static int tnum = 1;
+                print_table(cfg, width, tnum, e, o);
+                if (strlen(((docentry_table_t*)e->data)->caption) > 0)
+                    tnum++;
             } break;
         }
 
