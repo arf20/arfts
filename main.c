@@ -38,8 +38,18 @@ doc_print(const docentry_t *doc) {
                 fputc('\n', stderr);
                 for (size_t i = 0; i < el->count; i++)
                     fprintf(stderr, "-> %s\n", el->items[i].content);
-
             } break;
+            case ETABLE: {
+                docentry_table_t* et = (docentry_table_t*)e->data;
+                fputc('\n', stderr);
+                for (int r = 0; r < et->nrows; r++) {
+                    for (int c = 0; c < et->ncols; c++) {
+                        fprintf(stderr, "%s, ", et->cells[(r * et->ncols) + c]);
+                    }
+                    fputc('\n', stderr);
+                }
+
+             } break;
             case ETITLEPAGE: break;
             case EPAGEBREAK: break;
             case ETABLEOFCONTENTS: break;
