@@ -58,8 +58,8 @@ read_table(docentry_t *e, state_t *st, const char *toff) {
 
     /* allocate */
     et->cells =        malloc(sizeof(char*) * et->ncols * et->nrows);
-    et->cell_widths =  malloc(sizeof(int) * et->ncols * et->nrows);
-    et->cell_heights = malloc(sizeof(int) * et->ncols * et->nrows);
+    et->col_widths =   malloc(sizeof(int) * et->ncols * et->nrows);
+    et->row_heights =  malloc(sizeof(int) * et->ncols * et->nrows);
 
     /* copy words to matrix */
     const char *t = toff, *cend = NULL, *wend = NULL;

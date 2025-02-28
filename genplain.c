@@ -138,19 +138,19 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 
                 /* max width of each column */
                 for (int c = 0; c < et->ncols; c++) {
-                    et->cell_widths[c] = 0;
+                    et->col_widths[c] = 0;
                     for (int r = 0; r < et->nrows; r++) {
                         int cellwidth =
                             strlen(et->cells[(r * et->ncols) + c]) - 1;
-                        if (cellwidth > et->cell_widths[c])
-                            et->cell_widths[c] = cellwidth;
+                        if (cellwidth > et->col_widths[c])
+                            et->col_widths[c] = cellwidth;
                     }
                 }
 
                 /* sum of max widths is max width of table */
                 int sum = 0;
                 for (int c = 0; c < et->ncols; c++)
-                    sum += et->cell_widths[c];
+                    sum += et->col_widths[c];
 
                 /* if table overflows, normalize col widths to avail width */
                 if (((3 * et->ncols) + sum + 2) > width) {
@@ -158,21 +158,21 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                         (e->ecfg.indentparagraph * cfg->tabstop);
 
                     for (int c = 0; c < et->ncols; c++)
-                        et->cell_widths[c] =
-                            avail * ((float)et->cell_widths[c] / (float)sum);
+                        et->col_widths[c] =
+                            avail * ((float)et->col_widths[c] / (float)sum);
                 }
 
                 /* compute row heights */
                 for (int r = 0; r < et->nrows; r++) {
-                    et->cell_heights[r] = 0;
+                    et->row_heights[r] = 0;
                     for (int c = 0; c < et->ncols; c++) {
-                        int cellheight = text_countlines(et->cell_widths[c],
+                        int cellheight = text_countlines(et->col_widths[c],
                                 e->ecfg.indentparagraph, cfg->tabstop,
                                 et->cells[(r * et->ncols) + c]);
-                        if (cellheight > et->cell_heights[r])
-                            et->cell_heights[r] = cellheight;
+                        if (cellheight > et->row_heights[r])
+                            et->row_heights[r] = cellheight;
                     }
-                    if (et->cell_heights[r] > 1)
+                    if (et->row_heights[r] > 1)
                         et->has_interhbars = 1;
                 }
 
@@ -672,23 +672,23 @@ print_table(const docconfig_t *cfg, int width, int tnum, const docentry_t *e,
     docentry_table_t* et = (docentry_table_t*)e->data;
 
     /* top hbar */
-    print_table_hbar('-', et->ncols, et->cell_widths, cfg, &e->ecfg, o);
+    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->ecfg, o);
     /* first row */
-    print_table_row(et->ncols, et->cell_widths, et->cell_heights[0],
+    print_table_row(et->ncols, et->col_widths, et->row_heights[0],
         (const char **)&et->cells[0], cfg, &e->ecfg, o);
     /* header or normal hbar */
     if (et->has_header)
-        print_table_hbar('=', et->ncols, et->cell_widths, cfg, &e->ecfg, o);
+        print_table_hbar('=', et->ncols, et->col_widths, cfg, &e->ecfg, o);
     for (int r = 1; r < et->nrows; r++) {
         /* rest of rows */
-        print_table_row(et->ncols, et->cell_widths, et->cell_heights[r],
+        print_table_row(et->ncols, et->col_widths, et->row_heights[r],
             (const char **)&et->cells[r * et->ncols], cfg, &e->ecfg, o);
         /* after row hbar */
         if (et->has_interhbars && (r < et->nrows - 1))
-            print_table_hbar('-', et->ncols, et->cell_widths, cfg, &e->ecfg, o);
+            print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->ecfg, o);
     }
     /* bottom hbar */
-    print_table_hbar('-', et->ncols, et->cell_widths, cfg, &e->ecfg, o);
+    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->ecfg, o);
     /* table caption */
     if (et->caption && *et->caption != '\0') {
         print_marginl(cfg, o);

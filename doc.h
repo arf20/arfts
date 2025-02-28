@@ -90,7 +90,7 @@ typedef struct {
     const char *caption;
     int ncols, nrows, has_header, has_interhbars;
     char **cells; /* r*W + c */
-    int *cell_widths, *cell_heights;
+    int *col_widths, *row_heights;
 } docentry_table_t;
 
 
