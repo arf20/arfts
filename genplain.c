@@ -11,9 +11,9 @@
 
 int
 text_countlines(int width, int indent, int tabstop, const char *text) {
-    const char *s = text, *next;
+    const char *s = strip(text), *next;
     int linec = 1, charc = 0;
-    while (s) {
+    while (s && *s) {
         next = strchr(s, ' ');
         if (!next) {
             charc += strlen(s);
@@ -29,7 +29,7 @@ text_countlines(int width, int indent, int tabstop, const char *text) {
             charc = 0;
         }
  
-        s = next + 1;
+        s = strip(next + 1);
     }
 
     return linec;
@@ -254,8 +254,6 @@ print_centered_text_lf(const char *l, int width, FILE *o) {
 /* consumes one line of width */
 const char *
 print_ln_nolf(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
-    txt = strip(txt);
-    if (*txt == '\0') return txt;
     int lwlen = 0, llen = 0, gaps = 0;
     const char *pos = txt;
     /* count words that fit in the line */
@@ -319,6 +317,10 @@ print_ln_nolf(const char *txt, const docentry_config_t *ecfg, int width, FILE *o
 
 const char *
 print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
+    txt = strip(txt);
+    if (*txt == '\0')
+        return txt;
+
     const char *r = print_ln_nolf(txt, ecfg, width, o);
     print_lf(o);
     return r;
