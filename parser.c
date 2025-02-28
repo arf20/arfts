@@ -144,7 +144,7 @@ item_add_word(docentry_t *e, state_t *st, const char *wordoff) {
 }
 
 void
-parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
+parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
     FILE *f = fopen(fname, "r");
     if (!f) {
         fprintf(stderr, "Error opening file: %s\n", strerror(errno));
@@ -168,7 +168,7 @@ parse_file(const char *fname, docconfig_t *cfg, docentry_t *doc) {
 
     docentry_t *cur_entry = doc; /* current document entry */
 
-    docentry_config_t ecfg = {
+    docentry_format_t ecfg = {
         .align = ALEFT,
         .indentparagraph = 1
     };

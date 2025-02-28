@@ -49,7 +49,7 @@ doc_insert_null(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_paragraph(docentry_t *e, docentry_config_t *ecfg) {
+doc_insert_paragraph(docentry_t *e, docentry_format_t *ecfg) {
     docentry_t *newe = NULL;
     if (e->type == ENULL) {
         /* morph curr null entry into a paragraph */
@@ -146,7 +146,7 @@ doc_insert_tableofcontents(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_figure(docentry_t *e, const docentry_config_t *ecfg,
+doc_insert_figure(docentry_t *e, const docentry_format_t *ecfg,
 const char *caption)
 {
     docentry_t *newe = NULL;
@@ -172,7 +172,7 @@ const char *caption)
 }
 
 docentry_t*
-doc_insert_list(docentry_t *e, const docentry_config_t *ecfg, list_type_t type,
+doc_insert_list(docentry_t *e, const docentry_format_t *ecfg, list_type_t type,
     const char *caption)
 {
     docentry_t *newe = NULL;
@@ -213,7 +213,7 @@ doc_list_insert(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_table(docentry_t *e, const docentry_config_t *ecfg,
+doc_insert_table(docentry_t *e, const docentry_format_t *ecfg,
 const char *caption)
 {
     docentry_t *newe = NULL;

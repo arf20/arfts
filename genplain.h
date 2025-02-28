@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-void generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o);
+void generate_plain(const doc_format_t *cfg, docentry_t *doc, FILE *o);
 
 #endif /* _GENPLAIN_H */
 

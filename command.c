@@ -8,22 +8,22 @@
 #include "doc.h"
 
 void
-cmd_pagewidth(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_pagewidth(const char *args, state_t *st, doc_format_t *cfg) {
     cfg->pagewidth = strtol(args, NULL, 10);
 }
 
 void
-cmd_pageheight(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_pageheight(const char *args, state_t *st, doc_format_t *cfg) {
     cfg->pageheight = strtol(args, NULL, 10);
 }
 
 void
-cmd_tabstop(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_tabstop(const char *args, state_t *st, doc_format_t *cfg) {
     cfg->tabstop = strtol(args, NULL, 10);
 }
 
 void
-cmd_indentparagraph(const char *args, state_t *st, docentry_config_t *ecfg) {
+cmd_indentparagraph(const char *args, state_t *st, docentry_format_t *ecfg) {
     args = strip(args);
     if (strncmp(args, "on", 2) == 0)
         ecfg->indentparagraph = 1;
@@ -32,7 +32,7 @@ cmd_indentparagraph(const char *args, state_t *st, docentry_config_t *ecfg) {
 }
 
 void
-cmd_header(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_header(const char *args, state_t *st, doc_format_t *cfg) {
     char *tok1, *tok2, *tok3;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
@@ -57,7 +57,7 @@ cmd_header(const char *args, state_t *st, docconfig_t *cfg) {
 }
 
 void
-cmd_footer(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_footer(const char *args, state_t *st, doc_format_t *cfg) {
     char *tok1, *tok2, *tok3;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
@@ -82,7 +82,7 @@ cmd_footer(const char *args, state_t *st, docconfig_t *cfg) {
 }
 
 void
-cmd_margin(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_margin(const char *args, state_t *st, doc_format_t *cfg) {
     char *tok1, *tok2, *tok3, *tok4;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
@@ -102,21 +102,21 @@ cmd_margin(const char *args, state_t *st, docconfig_t *cfg) {
 }
 
 void
-cmd_title(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_title(const char *args, state_t *st, doc_format_t *cfg) {
     args = strip(args);
     const char *end = strchr(args, '\n');
     cfg->title = strndup(args, end - args);
 }
 
 void
-cmd_author(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_author(const char *args, state_t *st, doc_format_t *cfg) {
     args = strip(args);
     const char *end = strchr(args, '\n');
     cfg->author = strndup(args, end - args);
 }
 
 void
-cmd_date(const char *args, state_t *st, docconfig_t *cfg) {
+cmd_date(const char *args, state_t *st, doc_format_t *cfg) {
     args = strip(args);
     const char *end = strchr(args, '\n');
     cfg->date = strndup(args, end - args);
@@ -174,7 +174,7 @@ cmd_tableofcontents(docentry_t **e) {
 }
 
 void
-cmd_align(const char *args, state_t *st, docentry_config_t *ecfg) {
+cmd_align(const char *args, state_t *st, docentry_format_t *ecfg) {
     args = strip(args);
     const char *end = strchr(args, '\n');
     int arglen = end - args;
@@ -194,7 +194,7 @@ cmd_align(const char *args, state_t *st, docentry_config_t *ecfg) {
 }
 
 void
-cmd_fig(const char *args, state_t *st, const docentry_config_t *ecfg,
+cmd_fig(const char *args, state_t *st, const docentry_format_t *ecfg,
     docentry_t **e)
 {
     args = strip(args);
@@ -204,7 +204,7 @@ cmd_fig(const char *args, state_t *st, const docentry_config_t *ecfg,
 }
 
 void
-cmd_itemize(const char *args, state_t *st, const docentry_config_t *ecfg,
+cmd_itemize(const char *args, state_t *st, const docentry_format_t *ecfg,
     docentry_t **e)
 {
     args = strip(args);
@@ -213,7 +213,7 @@ cmd_itemize(const char *args, state_t *st, const docentry_config_t *ecfg,
 }
 
 void
-cmd_enumerate(const char *args, state_t *st, const docentry_config_t *ecfg,
+cmd_enumerate(const char *args, state_t *st, const docentry_format_t *ecfg,
     docentry_t **e)
 {
     args = strip(args);
@@ -230,7 +230,7 @@ cmd_item(const char *args, state_t *st, docentry_t **e) {
 }
 
 void
-cmd_table(const char *args, state_t *st, const docentry_config_t *ecfg,
+cmd_table(const char *args, state_t *st, const docentry_format_t *ecfg,
     docentry_t **e)
 {
     args = strip(args);
@@ -241,7 +241,7 @@ cmd_table(const char *args, state_t *st, const docentry_config_t *ecfg,
 
 
 const char*
-interpret_command(const char *cmd, docconfig_t *cfg, docentry_config_t *ecfg,
+interpret_command(const char *cmd, doc_format_t *cfg, docentry_format_t *ecfg,
     state_t *st, docentry_t **e)
 {
     const char *cmdend = strpbrk(cmd, " \n");

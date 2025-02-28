@@ -59,7 +59,7 @@ doc_print(const docentry_t *doc) {
 }
 
 void
-docconfig_print(const docconfig_t *cfg) {
+docconfig_print(const doc_format_t *cfg) {
     fprintf(stderr,
         "doc config:\n page dimensions: %dx%d\n tabstop: %s\n"
         " margins: %d %d %d %d\n"
@@ -81,7 +81,7 @@ main(int argc, char **argv) {
         exit(1);
     }
 
-    docconfig_t cfg = { 0 };
+    doc_format_t cfg = { 0 };
     docentry_t *doc = doc_new();
     parse_file(argv[1], &cfg, doc);
 

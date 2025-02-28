@@ -45,7 +45,7 @@ tableofcontents_countlines(int width, const docentry_t *doc)  {
 }
 
 void
-compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
+compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) {
     int page = 1, line = 0;
 
     docentry_t *l = NULL;
@@ -244,22 +244,22 @@ print_n_c(char c, int n, FILE *o) {
 }
 
 void
-print_tab(const docconfig_t *cfg, FILE *o) {
+print_tab(const doc_format_t *cfg, FILE *o) {
     print_n_c(' ', cfg->tabstop, o);
 }
 
 void
-print_marginl(const docconfig_t *cfg, FILE *o) {
+print_marginl(const doc_format_t *cfg, FILE *o) {
     print_n_c(' ', cfg->marginl, o);
 }
 
 void
-print_margint(const docconfig_t *cfg, FILE *o) {
+print_margint(const doc_format_t *cfg, FILE *o) {
     print_n_c('\n', cfg->margint, o);
 }
 
 void
-print_marginb(const docconfig_t *cfg, FILE *o) {
+print_marginb(const doc_format_t *cfg, FILE *o) {
     print_n_c('\n', cfg->marginb, o);
 }
 
@@ -281,7 +281,7 @@ print_centered_text_lf(const char *l, int width, FILE *o) {
 
 /* consumes one line of width */
 const char *
-print_ln_nolf(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
+print_ln_nolf(const char *txt, const docentry_format_t *ecfg, int width, FILE *o) {
     int lwlen = 0, llen = 0, gaps = 0;
     const char *pos = txt;
     /* count words that fit in the line */
@@ -344,7 +344,7 @@ print_ln_nolf(const char *txt, const docentry_config_t *ecfg, int width, FILE *o
 }
 
 const char *
-print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
+print_ln(const char *txt, const docentry_format_t *ecfg, int width, FILE *o) {
     txt = strip(txt);
     if (*txt == '\0')
         return txt;
@@ -356,7 +356,7 @@ print_ln(const char *txt, const docentry_config_t *ecfg, int width, FILE *o) {
 
 
 void
-print_header(const docconfig_t *cfg, int page, FILE *o) {
+print_header(const doc_format_t *cfg, int page, FILE *o) {
     static char pagenumbuff[16], pagenumextbuff[16];
     char *line = malloc(cfg->pagewidth + 1);
     memset(line, ' ', cfg->pagewidth);
@@ -416,7 +416,7 @@ print_header(const docconfig_t *cfg, int page, FILE *o) {
 }
 
 void
-print_footer(const docconfig_t *cfg, int page, FILE *o) {
+print_footer(const doc_format_t *cfg, int page, FILE *o) {
     static char pagenumbuff[16], pagenumextbuff[16];
     char *line = malloc(cfg->pagewidth + 1);
     memset(line, ' ', cfg->pagewidth);
@@ -478,7 +478,7 @@ print_footer(const docconfig_t *cfg, int page, FILE *o) {
 /* generation */
 
 void
-print_titlepage(const docconfig_t *cfg, int width, int height,
+print_titlepage(const doc_format_t *cfg, int width, int height,
     const docentry_t *tp, FILE *o)
 {
     /* center vertical */
@@ -494,7 +494,7 @@ print_titlepage(const docconfig_t *cfg, int width, int height,
 }
 
 void
-print_tableofcontents(const docconfig_t *cfg, int width, int height,
+print_tableofcontents(const doc_format_t *cfg, int width, int height,
     int toplvl, const docentry_t *toc, const docentry_t *doc, FILE *o)
 {
     print_marginl(cfg, o);
@@ -551,7 +551,7 @@ print_tableofcontents(const docconfig_t *cfg, int width, int height,
 }
 
 void
-print_structure(const docconfig_t *cfg, int width, int toplvl, int indices[5],
+print_structure(const doc_format_t *cfg, int width, int toplvl, int indices[5],
     const docentry_t *e, FILE *o)
 {
     int type = ((const docentry_structure_t*)e->data)->type;
@@ -568,7 +568,7 @@ print_structure(const docconfig_t *cfg, int width, int toplvl, int indices[5],
 }
 
 void
-print_paragraph(const docconfig_t *cfg, int width, const docentry_t *par,
+print_paragraph(const doc_format_t *cfg, int width, const docentry_t *par,
     FILE *o)
 {
     const char *s = par->data;
@@ -593,7 +593,7 @@ print_paragraph(const docconfig_t *cfg, int width, const docentry_t *par,
 }
 
 void
-print_figure(const docconfig_t *cfg, int width, int fignum,
+print_figure(const doc_format_t *cfg, int width, int fignum,
 const docentry_t *fig, FILE *o)
 {
     docentry_figure_t *ef = (docentry_figure_t*)fig->data;
@@ -625,7 +625,7 @@ const docentry_t *fig, FILE *o)
 }
 
 void
-print_list(const docconfig_t *cfg, int width, const docentry_t *e, FILE *o) {
+print_list(const doc_format_t *cfg, int width, const docentry_t *e, FILE *o) {
     docentry_list_t* el = (docentry_list_t*)e->data;
     print_marginl(cfg, o);
     if (el->caption[0] != '\0')
@@ -657,8 +657,8 @@ print_list(const docconfig_t *cfg, int width, const docentry_t *e, FILE *o) {
 /* table stuff */
 
 void
-print_table_hbar(char bc, int ncols, int *col_widths, const docconfig_t *cfg,
-    const docentry_config_t *ecfg, FILE *o)
+print_table_hbar(char bc, int ncols, int *col_widths, const doc_format_t *cfg,
+    const docentry_format_t *ecfg, FILE *o)
 {
     print_marginl(cfg, o);
     if (ecfg->indentparagraph)
@@ -674,8 +674,8 @@ print_table_hbar(char bc, int ncols, int *col_widths, const docconfig_t *cfg,
 
 void
 print_table_row(int ncols, int *col_widths, int row_height,
-    const char * const *cells, const docconfig_t *cfg,
-    const docentry_config_t *ecfg, FILE *o)
+    const char * const *cells, const doc_format_t *cfg,
+    const docentry_format_t *ecfg, FILE *o)
 {
     const char **cell_curs = malloc(sizeof(char**) * ncols);
     memcpy(cell_curs, cells, sizeof(char**) * ncols);
@@ -696,7 +696,7 @@ print_table_row(int ncols, int *col_widths, int row_height,
 }
 
 void
-print_table(const docconfig_t *cfg, int width, int tnum, const docentry_t *e,
+print_table(const doc_format_t *cfg, int width, int tnum, const docentry_t *e,
     FILE *o)
 {
     docentry_table_t* et = (docentry_table_t*)e->data;
@@ -730,7 +730,7 @@ print_table(const docconfig_t *cfg, int width, int tnum, const docentry_t *e,
 }
 
 void
-generate_plain(const docconfig_t *cfg, docentry_t *doc, FILE *o) {
+generate_plain(const doc_format_t *cfg, docentry_t *doc, FILE *o) {
     int width = cfg->pagewidth - cfg->marginl - cfg->marginr;
     int height = cfg->pageheight - cfg->margint - cfg->marginb;
     if (cfg->headerl) height -= 2;

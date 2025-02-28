@@ -11,7 +11,7 @@ typedef struct {
         marginb, marginr;
     char *headerl, *headerc, *headerr, *footerl, *footerc, *footerr;
     char *title, *author, *date;
-} docconfig_t;
+} doc_format_t;
 
 /* Reader state */
 typedef struct {
