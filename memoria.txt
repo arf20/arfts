@@ -29,24 +29,24 @@ TABLE OF CONTENTS
 1. Envios de Mooshak ......................................................... 3
 2. Análisis del programa ..................................................... 3
     2.1. Clases .............................................................. 3
-    2.2. Módulos ............................................................. 3
-    2.3. Makefile ............................................................ 4
-    2.4. Normalización ....................................................... 4
-    2.5. Tabla de dispersión ................................................. 4
-        2.5.1. Tipo .......................................................... 4
+    2.2. Módulos ............................................................. 4
+    2.3. Makefile ............................................................ 5
+    2.4. Normalización ....................................................... 5
+    2.5. Tabla de dispersión ................................................. 5
+        2.5.1. Tipo .......................................................... 5
         2.5.2. Función de dispersión ......................................... 5
         2.5.3. Reestructuracion .............................................. 5
-        2.5.4. Liberación .................................................... 5
-    2.6. Árbol ............................................................... 5
-        2.6.1. Tipo .......................................................... 5
-        2.6.2. Definición de árbol y nodo .................................... 5
-        2.6.3. Referencia a paginas .......................................... 5
-        2.6.4. Liberacion .................................................... 5
-    2.7. Globales ............................................................ 5
+        2.5.4. Liberación .................................................... 6
+    2.6. Árbol ............................................................... 6
+        2.6.1. Tipo .......................................................... 6
+        2.6.2. Definición de árbol y nodo .................................... 6
+        2.6.3. Referencia a paginas .......................................... 6
+        2.6.4. Liberacion .................................................... 6
+    2.7. Globales ............................................................ 6
     2.8. ChatGPT ............................................................. 6
 3. Listado completo del código ............................................... 6
-4. Informe de desarrollo ..................................................... 6
-5. Conclusiones y valoraciones personales .................................... 7
+4. Informe de desarrollo ..................................................... 7
+5. Conclusiones y valoraciones personales .................................... 8
 
 MEMORIA PROYECTO BUSCADOR                                                 PAGE 3
 
@@ -93,6 +93,9 @@ TABLE OF CONTENTS
     de         pasar         las          operaciones         del         árbol.
     
 
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 4
+
                  +--------+
                  | Pagina |
                  +--------+
@@ -127,9 +130,6 @@ TABLE OF CONTENTS
 
     aqui          va          una         enumeracion          y          figura
 
-
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 4
-
                                                 +-----------------+
                                                 | diccionario.hpp |
                                                 +-----------------+
@@ -151,6 +151,9 @@ TABLE OF CONTENTS
     main.o              interprete.o            diccionario.o
 
     Fig 2. Diagrama de modulos
+
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 5
 
 2.3. Makefile
 
@@ -194,9 +197,6 @@ ventajas  significativas:  con  sets  grandes, la  optimización  de  memoria  e
 insignificante, y para  tablas del mismo tamaño, la cerrada  es casi siempre más
 lenta.                                                                          
 
-
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 5
-
 2.5.2. Función de dispersión
 
     Al principio  mientras probaba, sumaba todos  los caracteres en un  entero y
@@ -213,6 +213,9 @@ dispersión             es             mucho            más             uniform
 
     No se  realiza reestructuración, se considera  que el tamaño de  la tabla es
 suficiente         para         el          número         de         elementos.
+
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 6
 
 2.5.4. Liberación
 
@@ -258,9 +261,6 @@ main().
 
     No   se    usa   ningún    tipo   de    variable   ni    constante   global.
 
-
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 6
-
 2.8. ChatGPT
 
     En ningún momento se ha usado  ChatGPT para ninguna parte del proyecto, solo
@@ -272,6 +272,9 @@ y  sabiduría  de  personas  humanas  usadas a  C++,  gcc  y  sus  intricaciones
 3. Listado completo del código
 
     Véase                           documento                           adjunto.
+
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 7
 
 4. Informe de desarrollo
 
@@ -328,7 +331,7 @@ que  cambiar las  cubetas  de la  tabla  de  dispersión a  std::list  en vez  d
 std::vector  (el contenedor  de referencias  cambia en  el problema  siguiente).
 
 
-MEMORIA PROYECTO BUSCADOR                                                 PAGE 7
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 8
 
     El programa sufría de fallos de segmento (página, en realidad), que ocurrían
 accediendo a las páginas mediante la referencia del árbol. gdb reportaba que las
@@ -386,6 +389,9 @@ Pensarías que no  es posible tener segfaults  usando solo la STL pero  si. Si l
 miras con valgrind, la  STL comete memory leaks insalvables por  su diseño y uso
 de templates.  Si querían que  usáramos punteros para  los árboles y  listas, el
 lenguaje         para         eso          es         C,         no         C++.
+
+
+MEMORIA PROYECTO BUSCADOR                                                 PAGE 9
 
     Sin embargo,  para usar C++, no  se explican bien toda  la funcionalidad que
 C++ ofrece.  Parece que la  mayoría no conoce si  quiera que C++  soporta UTF-8;

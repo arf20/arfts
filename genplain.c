@@ -12,23 +12,23 @@
 int
 text_countlines(int width, int indent, int tabstop, const char *text) {
     const char *s = strip(text), *next;
-    int linec = 1, charc = 0;
+    int linec = 1, charc = -1; /* starts w no preword space */
     while (s && *s) {
         next = strchr(s, ' ');
         if (!next) {
             charc += strlen(s);
             next = (const char *)-1;
         }
-        else
-            charc += (next - s);
 
-        if ((charc > width) || (linec == 0 && indent &&
-            charc + tabstop > width))
+        if (((charc + (next - s) + 1) > width) || (linec == 0 && indent &&
+            (charc + tabstop + (next - s) + 1) > width))
         {
             linec++;
-            charc = 0;
+            charc = -1;
         }
  
+        charc += (next - s) + 1;
+
         s = strip(next + 1);
     }
 
@@ -55,47 +55,48 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
             case ENULL: break;
             case EPARAGRAPH: {
                 e->height = text_countlines(width, e->ecfg.indentparagraph,
-                    cfg->tabstop, e->data);
+                    cfg->tabstop, e->data) + 1; /* 1 line margin */
+                e->width = width;
                 if (line + e->height > height) {
                     page++;
                     line = 0;
 
                     if (l && l->type == ESTRUCTURE) {
                         l->page = page;
+                        l->line = 0;
                         line = 2;
                     }
                 }
                 e->page = page;
                 e->line = line;
-                line += e->height + 1; /* 1 line margin */
-                
+                line += e->height;
             } break;
             case ESTRUCTURE: {
-                if (line + 2 >= height) {
+                e->height = 2;
+                e->width = width;
+
+                if (line + e->height >= height) {
                     page++;
                     line = 0;
                 }
-                line += 2;
 
                 e->page = page; /* set page */
                 e->line = line;
-                e->height = 2;
-
+                line += e->height;
             } break;
             case ETITLEPAGE: e->page = page++; line = 0; break;
             case ETABLEOFCONTENTS: {
                 e->page = page;
                 e->line = line;
-                int toclines = tableofcontents_countlines(width, doc);
-                page += (toclines / height) + ((toclines % height) != 0);
+                e->height = tableofcontents_countlines(width, doc);
+                page += (e->height / height) + ((e->height % height) != 0);
                 line = 0;
-                e->height = toclines;
             } break;
             case EPAGEBREAK: {
+                e->page = page;
+                e->line = line;
                 page++;
                 line = 0;
-                e->page = page;
-                e->line = 0;
             } break;
             case EFIGURE: {
                 docentry_figure_t *ef = (docentry_figure_t*)e->data;
@@ -116,15 +117,20 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                     line = 0;
                 }
 
-                line += e->height;
                 e->page = page;
+                e->line = line;
+                line += e->height;
             } break;
             case ELIST: {
                 docentry_list_t* el = (docentry_list_t*)e->data;
+
                 e->height = 0;
                 if (el->caption[0] == '\0')
                     e->height++;
-                e->height += el->count;
+                for (int i = 0; i < el->count; i++) {
+                    e->height += text_countlines(width, e->ecfg.indentparagraph,
+                        cfg->tabstop, el->items[i].content);
+                }
 
                 if (line + e->height >= height) {
                     page++;
@@ -132,6 +138,8 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                 }
 
                 e->page = page;
+                e->line = line;
+                line += e->height;
             } break;
             case ETABLE: {
                 docentry_table_t* et = (docentry_table_t*)e->data;
@@ -176,7 +184,27 @@ compute_layout(const docconfig_t *cfg, int width, int height, docentry_t *doc) {
                         et->has_interhbars = 1;
                 }
 
+                /* calculate table height and page fit */
+                e->height = 1;
+                if (!et->has_interhbars && et->has_header)
+                    e->height++;
+                for (int r = 0; r < et->nrows; r++) {
+                    e->height += et->row_heights[r];
+                    if (et->has_interhbars)
+                        e->height++;
+                }
+                e->height++;
+                if (et->caption && et->caption[0])
+                    e->height++;
+
+                if (line + e->height >= height) {
+                    page++;
+                    line = 0;
+                }
+
                 e->page = page;
+                e->line = line;
+                line += e->height;
             } break;
         }
 

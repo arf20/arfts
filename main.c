@@ -15,10 +15,10 @@ usage(char *argv0) {
 
 void
 doc_print(const docentry_t *doc) {
-    int c = 0;
-    for (const docentry_t *e = doc; e != NULL; e = e->n, c++) {
-        fprintf(stderr, " doc[%d,%d]: %s",
-            e->page, c, entrytype_names[e->type]);
+    int i = 0;
+    for (const docentry_t *e = doc; e != NULL; e = e->n, i++) {
+        fprintf(stderr, " doc[I%d,P%d,L%d][%dx%d]: %s",
+            i, e->page, e->line, e->width, e->height, entrytype_names[e->type]);
         switch (e->type) {
             case ENULL: break;
             case EPARAGRAPH: {
@@ -36,8 +36,8 @@ doc_print(const docentry_t *doc) {
             case ELIST: {
                 docentry_list_t* el = (docentry_list_t*)e->data;
                 fputc('\n', stderr);
-                for (size_t i = 0; i < el->count; i++)
-                    fprintf(stderr, "-> %s\n", el->items[i].content);
+                for (size_t j = 0; j < el->count; j++)
+                    fprintf(stderr, "-> %s\n", el->items[j].content);
             } break;
             case ETABLE: {
                 docentry_table_t* et = (docentry_table_t*)e->data;
