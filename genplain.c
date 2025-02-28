@@ -22,8 +22,8 @@ text_countlines(int width, int indent, int tabstop, const char *text) {
         else
             charc += (next - s);
 
-        if ((charc >= width) || (linec == 0 && indent &&
-            charc + tabstop >= width))
+        if ((charc > width) || (linec == 0 && indent &&
+            charc + tabstop > width))
         {
             linec++;
             charc = 0;
