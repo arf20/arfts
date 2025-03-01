@@ -54,7 +54,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
         switch (e->type) {
             case ENULL: break;
             case EPARAGRAPH: {
-                e->height = text_countlines(width, e->ecfg.indentparagraph,
+                e->height = text_countlines(width, e->efmt.indent,
                     cfg->tabstop, e->data) + 1; /* 1 line margin */
                 e->width = width;
                 if (line + e->height > height) {
@@ -128,7 +128,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
                 if (el->caption[0] == '\0')
                     e->height++;
                 for (int i = 0; i < el->count; i++) {
-                    e->height += text_countlines(width, e->ecfg.indentparagraph,
+                    e->height += text_countlines(width, e->efmt.indent,
                         cfg->tabstop, el->items[i].content);
                 }
 
@@ -163,7 +163,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
                 /* if table overflows, normalize col widths to avail width */
                 if (((3 * et->ncols) + sum + 2) > width) {
                     float avail = width - (3 * et->ncols) - 2 -
-                        (e->ecfg.indentparagraph * cfg->tabstop);
+                        (e->efmt.indent * cfg->tabstop);
 
                     for (int c = 0; c < et->ncols; c++)
                         et->col_widths[c] =
@@ -175,7 +175,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
                     et->row_heights[r] = 0;
                     for (int c = 0; c < et->ncols; c++) {
                         int cellheight = text_countlines(et->col_widths[c],
-                                e->ecfg.indentparagraph, cfg->tabstop,
+                                e->efmt.indent, cfg->tabstop,
                                 et->cells[(r * et->ncols) + c]);
                         if (cellheight > et->row_heights[r])
                             et->row_heights[r] = cellheight;
@@ -281,7 +281,7 @@ print_centered_text_lf(const char *l, int width, FILE *o) {
 
 /* consumes one line of width */
 const char *
-print_ln_nolf(const char *txt, const docentry_format_t *ecfg, int width, FILE *o) {
+print_ln_nolf(const char *txt, const docentry_format_t *efmt, int width, FILE *o) {
     int lwlen = 0, llen = 0, gaps = 0;
     const char *pos = txt;
     /* count words that fit in the line */
@@ -299,7 +299,7 @@ print_ln_nolf(const char *txt, const docentry_format_t *ecfg, int width, FILE *o
     llen--;
     gaps--;
 
-    switch (ecfg->align) {
+    switch (efmt->align) {
         case ALEFT: fprintf(o, "%.*s", llen, txt); break;
         case ARIGHT: {
             print_n_c(' ', width - lwlen, o);
@@ -344,12 +344,12 @@ print_ln_nolf(const char *txt, const docentry_format_t *ecfg, int width, FILE *o
 }
 
 const char *
-print_ln(const char *txt, const docentry_format_t *ecfg, int width, FILE *o) {
+print_ln(const char *txt, const docentry_format_t *efmt, int width, FILE *o) {
     txt = strip(txt);
     if (*txt == '\0')
         return txt;
 
-    const char *r = print_ln_nolf(txt, ecfg, width, o);
+    const char *r = print_ln_nolf(txt, efmt, width, o);
     print_lf(o);
     return r;
 }
@@ -577,16 +577,16 @@ print_paragraph(const doc_format_t *cfg, int width, const docentry_t *par,
 
     /* indent */
     int firstlnw = width;
-    if (par->ecfg.indentparagraph && par->ecfg.align != ACENTER) {
-        if (par->ecfg.align != ARIGHT)
+    if (par->efmt.indent && par->efmt.align != ACENTER) {
+        if (par->efmt.align != ARIGHT)
             print_tab(cfg, o);
         firstlnw = width - cfg->tabstop;
     }
 
-    s = print_ln(s, &par->ecfg, firstlnw, o);
+    s = print_ln(s, &par->efmt, firstlnw, o);
     while (s && *s) {
         print_marginl(cfg, o);
-        s = print_ln(s, &par->ecfg, width, o);
+        s = print_ln(s, &par->efmt, width, o);
     }
 
     print_lf(o);
@@ -608,7 +608,7 @@ const docentry_t *fig, FILE *o)
         int linelen = strpbrk(line, "\n\0") - line;
 
         print_marginl(cfg, o);
-        if (fig->ecfg.indentparagraph)
+        if (fig->efmt.indent)
             print_tab(cfg, o);
         fprintf(o, "%.*s", linelen, line);
 
@@ -617,7 +617,7 @@ const docentry_t *fig, FILE *o)
 
     if (ef->caption && *ef->caption) {
         print_marginl(cfg, o);
-        if (fig->ecfg.indentparagraph)
+        if (fig->efmt.indent)
             print_tab(cfg, o);
         fprintf(o, "Fig %d. %s\n", fignum, ef->caption);
     }
@@ -643,11 +643,11 @@ print_list(const doc_format_t *cfg, int width, const docentry_t *e, FILE *o) {
             fltab += fprintf(o, "%d. ", i + 1);
         }
         const char *s = el->items[i].content;
-        s = print_ln(s, &e->ecfg, width - fltab, o);
+        s = print_ln(s, &e->efmt, width - fltab, o);
         while (s && *s) {
             print_marginl(cfg, o);
             print_tab(cfg, o);
-            s = print_ln(s, &e->ecfg, width - cfg->tabstop, o);
+            s = print_ln(s, &e->efmt, width - cfg->tabstop, o);
         }
         print_lf(o);
     }
@@ -658,10 +658,10 @@ print_list(const doc_format_t *cfg, int width, const docentry_t *e, FILE *o) {
 
 void
 print_table_hbar(char bc, int ncols, int *col_widths, const doc_format_t *cfg,
-    const docentry_format_t *ecfg, FILE *o)
+    const docentry_format_t *efmt, FILE *o)
 {
     print_marginl(cfg, o);
-    if (ecfg->indentparagraph)
+    if (efmt->indent)
         print_tab(cfg, o);
 
     for (int c = 0; c < ncols; c++) {
@@ -675,20 +675,20 @@ print_table_hbar(char bc, int ncols, int *col_widths, const doc_format_t *cfg,
 void
 print_table_row(int ncols, int *col_widths, int row_height,
     const char * const *cells, const doc_format_t *cfg,
-    const docentry_format_t *ecfg, FILE *o)
+    const docentry_format_t *efmt, FILE *o)
 {
     const char **cell_curs = malloc(sizeof(char**) * ncols);
     memcpy(cell_curs, cells, sizeof(char**) * ncols);
 
     for (int l = 0; l < row_height; l++) {
         print_marginl(cfg, o);
-        if (ecfg->indentparagraph)
+        if (efmt->indent)
             print_tab(cfg, o);
 
         for (int c = 0; c < ncols; c++) {
             fprintf(o, "| ");
             //fprintf(o, cells[c]);
-            cell_curs[c] = print_ln_nolf(cell_curs[c], ecfg, col_widths[c], o);
+            cell_curs[c] = print_ln_nolf(cell_curs[c], efmt, col_widths[c], o);
             fprintf(o, " ");
         }
         fprintf(o, "|\n");
@@ -702,27 +702,27 @@ print_table(const doc_format_t *cfg, int width, int tnum, const docentry_t *e,
     docentry_table_t* et = (docentry_table_t*)e->data;
 
     /* top hbar */
-    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->ecfg, o);
+    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->efmt, o);
     /* first row */
     print_table_row(et->ncols, et->col_widths, et->row_heights[0],
-        (const char **)&et->cells[0], cfg, &e->ecfg, o);
+        (const char **)&et->cells[0], cfg, &e->efmt, o);
     /* header or normal hbar */
     if (et->has_header)
-        print_table_hbar('=', et->ncols, et->col_widths, cfg, &e->ecfg, o);
+        print_table_hbar('=', et->ncols, et->col_widths, cfg, &e->efmt, o);
     for (int r = 1; r < et->nrows; r++) {
         /* rest of rows */
         print_table_row(et->ncols, et->col_widths, et->row_heights[r],
-            (const char **)&et->cells[r * et->ncols], cfg, &e->ecfg, o);
+            (const char **)&et->cells[r * et->ncols], cfg, &e->efmt, o);
         /* after row hbar */
         if (et->has_interhbars && (r < et->nrows - 1))
-            print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->ecfg, o);
+            print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->efmt, o);
     }
     /* bottom hbar */
-    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->ecfg, o);
+    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->efmt, o);
     /* table caption */
     if (et->caption && *et->caption != '\0') {
         print_marginl(cfg, o);
-         if (e->ecfg.indentparagraph)
+         if (e->efmt.indent)
             print_tab(cfg, o);
         fprintf(o, "Table %d. %s\n", tnum, et->caption);
     }

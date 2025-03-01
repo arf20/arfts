@@ -5,7 +5,7 @@
 #include "doc.h"
 
 const char *interpret_command(const char *cmd, doc_format_t *cfg,
-    docentry_format_t *ecfg, state_t *st, docentry_t **doc);
+    docentry_format_t *efmt, state_t *st, docentry_t **doc);
 
 #endif /* _COMMAND_H */
 

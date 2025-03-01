@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct {
     align_t align;
-    int indentparagraph;
+    int indent;
     int columns;
 } docentry_format_t;
 
@@ -38,7 +38,7 @@ extern const char *entrytype_names[];
 /* Document tree node */
 typedef struct docentry_s {
     entrytype_t type;
-    docentry_format_t ecfg;
+    docentry_format_t efmt;
     int page, line, width, height;
     char *data;
     size_t size, capacity;
@@ -96,18 +96,18 @@ typedef struct {
 
 docentry_t *doc_new();
 docentry_t *doc_insert_null(docentry_t *e);
-docentry_t *doc_insert_paragraph(docentry_t *e, docentry_format_t *ecfg);
+docentry_t *doc_insert_paragraph(docentry_t *e, docentry_format_t *efmt);
 docentry_t *doc_insert_titlepage(docentry_t *e);
 docentry_t *doc_insert_structure(docentry_t *e, structuretype_t type,
     const char *heading);
 docentry_t *doc_insert_pagebreak(docentry_t *e);
 docentry_t *doc_insert_tableofcontents(docentry_t *e);
-docentry_t *doc_insert_figure(docentry_t *e, const docentry_format_t *ecfg,
+docentry_t *doc_insert_figure(docentry_t *e, const docentry_format_t *efmt,
     const char *caption);
-docentry_t *doc_insert_list(docentry_t *e, const docentry_format_t *ecfg,
+docentry_t *doc_insert_list(docentry_t *e, const docentry_format_t *efmt,
     list_type_t type, const char *caption);
 void doc_list_insert(docentry_t *e);
-docentry_t *doc_insert_table(docentry_t *e, const docentry_format_t *ecfg,
+docentry_t *doc_insert_table(docentry_t *e, const docentry_format_t *efmt,
     const char *caption);
 
 #endif /* _DOC_H */

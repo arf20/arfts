@@ -5,7 +5,7 @@
 .tabstop 4
 .margin 0 4 1 4
 
-.indentparagraph on
+.indent on
 .header "LEFT HEADER" "MIDDLE HEADER" pagenumext
 .footer off
 .footer "FOOTER aesadf dfds"

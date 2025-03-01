@@ -2,7 +2,7 @@
 .pageheight 63
 .tabstop 4
 .margin 1 0 1 0
-.indentparagraph on
+.indent on
 .header "MEMORIA PROYECTO BUSCADOR" pagenumext
 .align justify
 

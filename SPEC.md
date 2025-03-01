@@ -23,7 +23,7 @@ Default 63
 
 Default 4
 
-### .indentparagraph on | off
+### .indent on | off
 
 Default on, indents 1 tab
 

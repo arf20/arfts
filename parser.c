@@ -168,9 +168,9 @@ parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
 
     docentry_t *cur_entry = doc; /* current document entry */
 
-    docentry_format_t ecfg = {
+    docentry_format_t efmt = {
         .align = ALEFT,
-        .indentparagraph = 1
+        .indent = 1
     };
 
     while (cursor && *cursor) {
@@ -188,7 +188,7 @@ parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
 
         if (*cursor == '.') {
             /* command */
-            cursor = interpret_command(cursor, cfg, &ecfg, &st, &cur_entry);
+            cursor = interpret_command(cursor, cfg, &efmt, &st, &cur_entry);
         } else if (*cursor == '\n') {
             cursor++;
             st.linenum++;
@@ -209,7 +209,7 @@ parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
             } else {
                 /* body word */
                 if (cur_entry->type != EPARAGRAPH)
-                    cur_entry = doc_insert_paragraph(cur_entry, &ecfg);
+                    cur_entry = doc_insert_paragraph(cur_entry, &efmt);
                 cursor = paragraph_add_word(cur_entry, &st, cursor);
             }
 

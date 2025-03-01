@@ -49,7 +49,7 @@ doc_insert_null(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_paragraph(docentry_t *e, docentry_format_t *ecfg) {
+doc_insert_paragraph(docentry_t *e, docentry_format_t *efmt) {
     docentry_t *newe = NULL;
     if (e->type == ENULL) {
         /* morph curr null entry into a paragraph */
@@ -61,7 +61,7 @@ doc_insert_paragraph(docentry_t *e, docentry_format_t *ecfg) {
         e->n = newe;
     }
     newe->type = EPARAGRAPH;
-    newe->ecfg = *ecfg;
+    newe->efmt = *efmt;
 
     newe->data = malloc(EPARAGRAPH_INITIAL_CAPACITY);
     newe->capacity = EPARAGRAPH_INITIAL_CAPACITY;
@@ -146,7 +146,7 @@ doc_insert_tableofcontents(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_figure(docentry_t *e, const docentry_format_t *ecfg,
+doc_insert_figure(docentry_t *e, const docentry_format_t *efmt,
 const char *caption)
 {
     docentry_t *newe = NULL;
@@ -159,7 +159,7 @@ const char *caption)
         e->n = newe;
     }
     newe->type = EFIGURE;
-    newe->ecfg = *ecfg;
+    newe->efmt = *efmt;
     newe->height = 0;
     newe->data = malloc(newe->size = sizeof(docentry_figure_t));
     newe->size = newe->capacity = sizeof(docentry_figure_t);
@@ -172,7 +172,7 @@ const char *caption)
 }
 
 docentry_t*
-doc_insert_list(docentry_t *e, const docentry_format_t *ecfg, list_type_t type,
+doc_insert_list(docentry_t *e, const docentry_format_t *efmt, list_type_t type,
     const char *caption)
 {
     docentry_t *newe = NULL;
@@ -185,7 +185,7 @@ doc_insert_list(docentry_t *e, const docentry_format_t *ecfg, list_type_t type,
         e->n = newe;
     }
     newe->type = ELIST;
-    newe->ecfg = *ecfg;
+    newe->efmt = *efmt;
     newe->height = 0;
     newe->data = malloc(newe->size = sizeof(docentry_list_t));
     newe->size = newe->capacity = sizeof(docentry_list_t);
@@ -213,7 +213,7 @@ doc_list_insert(docentry_t *e) {
 }
 
 docentry_t*
-doc_insert_table(docentry_t *e, const docentry_format_t *ecfg,
+doc_insert_table(docentry_t *e, const docentry_format_t *efmt,
 const char *caption)
 {
     docentry_t *newe = NULL;
@@ -226,7 +226,7 @@ const char *caption)
         e->n = newe;
     }
     newe->type = ETABLE;
-    newe->ecfg = *ecfg;
+    newe->efmt = *efmt;
     newe->height = 0;
     newe->data = malloc(newe->size = sizeof(docentry_table_t));
     newe->size = newe->capacity = sizeof(docentry_table_t);
