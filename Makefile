@@ -18,5 +18,5 @@ $(BINARY): $(OBJ)
 
 .PHONY: clean
 clean:
-	rm $(BINARY) *.o
+	rm -f $(BINARY) *.o
 

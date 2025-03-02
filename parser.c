@@ -99,7 +99,8 @@ paragraph_add_word(docentry_t *e, state_t *st, const char *wordoff) {
     if (e->type != EPARAGRAPH)
         return wordoff;
 
-    int wordlen = strpbrk(wordoff, " \n") - wordoff;
+    const char *wend = strpbrk(wordoff, " \n");
+    int wordlen = wend ? wend - wordoff : strlen(wordoff);
 
     if (wordoff[wordlen] == '\n')
         st->linenum++;
@@ -125,7 +126,8 @@ item_add_word(docentry_t *e, state_t *st, const char *wordoff) {
     docentry_list_t *el = (docentry_list_t*)e->data;
     docentry_list_item_t *li = &el->items[el->count - 1];
 
-    int wordlen = strpbrk(wordoff, " \n") - wordoff;
+    const char *wend = strpbrk(wordoff, " \n");
+    int wordlen = wend ? wend - wordoff : strlen(wordoff);
 
     if (wordoff[wordlen] == '\n')
         st->linenum++;
@@ -144,27 +146,10 @@ item_add_word(docentry_t *e, state_t *st, const char *wordoff) {
 }
 
 void
-parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
-    FILE *f = fopen(fname, "r");
-    if (!f) {
-        fprintf(stderr, "Error opening file: %s\n", strerror(errno));
-        exit(1);
-    }
-
-    fseek(f, 0, SEEK_END); 
-    size_t size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-
-    char *src = malloc(size + 1);
-    fread(src, 1, size, f);
-    src[size] = '\0';
-
-    fclose(f);
-
+parse_file(const char *src, doc_format_t *cfg, docentry_t *doc) {
     const char *cursor = src;
 
-    state_t st = { 0 };
-    st.linenum = 1;
+    state_t st = { 1, 1, 0, 0, 0 };
 
     docentry_t *cur_entry = doc; /* current document entry */
 
@@ -186,7 +171,7 @@ parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
 
         cursor = strip(cursor);
 
-        if (*cursor == '.') {
+        if (st.prev_nl && *cursor == '.') {
             /* command */
             cursor = interpret_command(cursor, cfg, &efmt, &st, &cur_entry);
         } else if (*cursor == '\n') {
@@ -216,7 +201,5 @@ parse_file(const char *fname, doc_format_t *cfg, docentry_t *doc) {
             st.prev_nl = 0;
         }
     }
-
-    free(src);
 }
 

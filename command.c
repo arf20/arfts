@@ -223,8 +223,6 @@ cmd_enumerate(const char *args, state_t *st, const docentry_format_t *efmt,
 
 void
 cmd_item(const char *args, state_t *st, docentry_t **e) {
-    args = strip(args);
-    const char *end = strchr(args, '\n');
     doc_list_insert(*e);
     st->in_item = 1;
 }

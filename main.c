@@ -8,9 +8,12 @@
 #include "genplain.h"
 #include "parser.h"
 
+#define STDIN_READ_SIZE    4096
+
 void
 usage(char *argv0) {
-    printf("usage: %s <file>\n\n", argv0);
+    printf("usage: %s <input> <output>\n\n", argv0);
+    exit(1);
 }
 
 void
@@ -76,20 +79,86 @@ docconfig_print(const doc_format_t *cfg) {
 
 int
 main(int argc, char **argv) {
-    if (argc != 2) {
-        usage(*argv);
+    const char *inputstr = NULL, *outputstr = NULL;
+    FILE *input = NULL, *output = NULL;
+    char *inputbuff = NULL;
+    int debug = 0;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-o") == 0) {
+            if (i + 1 >= argc)
+                usage(*argv);
+            outputstr = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "-d") == 0)
+            debug = 1;
+        else if (!inputstr)
+            inputstr = argv[i];
+        else
+            usage(*argv);
+    }
+
+    if (!inputstr || strcmp(inputstr, "-") == 0) {
+        input = stdin;
+        size_t alloc = STDIN_READ_SIZE, size = 0;
+        int read = 0;
+        inputbuff = malloc(STDIN_READ_SIZE);
+
+        while (1) {
+            read = fread(inputbuff + size, 1, STDIN_READ_SIZE, input);
+            size += read;
+            if (read != STDIN_READ_SIZE)
+                break;
+            alloc += STDIN_READ_SIZE;
+            inputbuff = realloc(inputbuff, alloc);
+        }
+
+        inputbuff[size] = '\0';
+
+    } else {
+        input = fopen(inputstr, "r");
+
+        fseek(input, 0, SEEK_END); 
+        size_t size = ftell(input);
+        fseek(input, 0, SEEK_SET);
+
+        inputbuff = malloc(size + 1);
+        fread(inputbuff, 1, size, input);
+        inputbuff[size] = '\0';
+
+        fclose(input);
+    }
+
+
+    if (outputstr) {
+        if (strcmp(outputstr, "-") == 0)
+            output = stdout;
+        else
+            output = fopen(outputstr, "w");
+    } else
+        output = stdout;
+
+
+    if (!input) {
+        fprintf(stderr, "Error opening input: %s\n", strerror(errno));
         exit(1);
     }
 
-    doc_format_t cfg = { 0 };
-    docentry_t *doc = doc_new();
-    parse_file(argv[1], &cfg, doc);
 
-    generate_plain(&cfg, doc, stdout);
+    doc_format_t cfg = { 80, 137, 4, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL};
+    docentry_t *doc = doc_new();
+    parse_file(inputbuff, &cfg, doc);
+
+    free(inputbuff);
+
+    generate_plain(&cfg, doc, output);
 
     /* debug */
-    doc_print(doc); 
-    docconfig_print(&cfg);
+    if (debug) {
+        doc_print(doc); 
+        docconfig_print(&cfg);
+    }
 
     return 0;
 }
