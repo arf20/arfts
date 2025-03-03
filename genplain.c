@@ -45,7 +45,7 @@ tableofcontents_countlines(int width, const docentry_t *doc)  {
 }
 
 void
-compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) {
+compute_layout(const doc_format_t *fmt, int width, int height, docentry_t *doc) {
     int page = 1, line = 0;
 
     docentry_t *l = NULL;
@@ -55,7 +55,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
             case ENULL: break;
             case EPARAGRAPH: {
                 e->height = text_countlines(width, e->efmt.indent,
-                    cfg->tabstop, e->data) + 1; /* 1 line margin */
+                    fmt->tabstop, e->data) + 1; /* 1 line margin */
                 e->width = width;
                 if (line + e->height > height) {
                     page++;
@@ -129,7 +129,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
                     e->height++;
                 for (int i = 0; i < el->count; i++) {
                     e->height += text_countlines(width, e->efmt.indent,
-                        cfg->tabstop, el->items[i].content);
+                        fmt->tabstop, el->items[i].content);
                 }
 
                 if (line + e->height >= height) {
@@ -163,7 +163,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
                 /* if table overflows, normalize col widths to avail width */
                 if (((3 * et->ncols) + sum + 2) > width) {
                     float avail = width - (3 * et->ncols) - 2 -
-                        (e->efmt.indent * cfg->tabstop);
+                        (e->efmt.indent * fmt->tabstop);
 
                     for (int c = 0; c < et->ncols; c++)
                         et->col_widths[c] =
@@ -175,7 +175,7 @@ compute_layout(const doc_format_t *cfg, int width, int height, docentry_t *doc) 
                     et->row_heights[r] = 0;
                     for (int c = 0; c < et->ncols; c++) {
                         int cellheight = text_countlines(et->col_widths[c],
-                                e->efmt.indent, cfg->tabstop,
+                                e->efmt.indent, fmt->tabstop,
                                 et->cells[(r * et->ncols) + c]);
                         if (cellheight > et->row_heights[r])
                             et->row_heights[r] = cellheight;
@@ -244,23 +244,23 @@ print_n_c(char c, int n, FILE *o) {
 }
 
 void
-print_tab(const doc_format_t *cfg, FILE *o) {
-    print_n_c(' ', cfg->tabstop, o);
+print_tab(const doc_format_t *fmt, FILE *o) {
+    print_n_c(' ', fmt->tabstop, o);
 }
 
 void
-print_marginl(const doc_format_t *cfg, FILE *o) {
-    print_n_c(' ', cfg->marginl, o);
+print_marginl(const doc_format_t *fmt, FILE *o) {
+    print_n_c(' ', fmt->marginl, o);
 }
 
 void
-print_margint(const doc_format_t *cfg, FILE *o) {
-    print_n_c('\n', cfg->margint, o);
+print_margint(const doc_format_t *fmt, FILE *o) {
+    print_n_c('\n', fmt->margint, o);
 }
 
 void
-print_marginb(const doc_format_t *cfg, FILE *o) {
-    print_n_c('\n', cfg->marginb, o);
+print_marginb(const doc_format_t *fmt, FILE *o) {
+    print_n_c('\n', fmt->marginb, o);
 }
 
 void
@@ -356,59 +356,59 @@ print_ln(const char *txt, const docentry_format_t *efmt, int width, FILE *o) {
 
 
 void
-print_header(const doc_format_t *cfg, int page, FILE *o) {
+print_header(const doc_format_t *fmt, int page, FILE *o) {
     static char pagenumbuff[16], pagenumextbuff[16];
-    char *line = malloc(cfg->pagewidth + 1);
-    memset(line, ' ', cfg->pagewidth);
-    line[cfg->pagewidth] = '\0';
+    char *line = malloc(fmt->pagewidth + 1);
+    memset(line, ' ', fmt->pagewidth);
+    line[fmt->pagewidth] = '\0';
 
     snprintf(pagenumbuff, 16, "%d", page);
     snprintf(pagenumextbuff, 16, "PAGE %d", page);
 
     char *headerl = NULL, *headerc = NULL, *headerr = NULL;
    
-    if (cfg->headerl) {
-        if (strcmp(cfg->headerl, "pagenum") == 0)
+    if (fmt->headerl) {
+        if (strcmp(fmt->headerl, "pagenum") == 0)
             headerl = pagenumbuff;
-        else if (strcmp(cfg->headerl, "pagenumext") == 0)
+        else if (strcmp(fmt->headerl, "pagenumext") == 0)
             headerl = pagenumextbuff;
         else
-            headerl = cfg->headerl;
+            headerl = fmt->headerl;
     }
 
-    if (cfg->headerc) {
-        if (strcmp(cfg->headerc, "pagenum") == 0)
+    if (fmt->headerc) {
+        if (strcmp(fmt->headerc, "pagenum") == 0)
             headerc = pagenumbuff;
-        else if (strcmp(cfg->headerc, "pagenumext") == 0)
+        else if (strcmp(fmt->headerc, "pagenumext") == 0)
             headerc = pagenumextbuff;
         else
-            headerc = cfg->headerc;
+            headerc = fmt->headerc;
     }
 
-    if (cfg->headerr) {
-        if (strcmp(cfg->headerr, "pagenum") == 0)
+    if (fmt->headerr) {
+        if (strcmp(fmt->headerr, "pagenum") == 0)
             headerr = pagenumbuff;
-        else if (strcmp(cfg->headerr, "pagenumext") == 0)
+        else if (strcmp(fmt->headerr, "pagenumext") == 0)
             headerr = pagenumextbuff;
         else
-            headerr = cfg->headerr;
+            headerr = fmt->headerr;
     }
 
 
     if (headerl) {
-        memcpy(line, headerl, MIN(strlen(headerl), cfg->pagewidth));
+        memcpy(line, headerl, MIN(strlen(headerl), fmt->pagewidth));
     }
     if (headerc) {
         int len = strlen(headerc);
-        int spacel = (cfg->pagewidth - len) / 2;
+        int spacel = (fmt->pagewidth - len) / 2;
         memcpy(line + spacel, headerc,
-            MIN(strlen(headerc), cfg->pagewidth - spacel));
+            MIN(strlen(headerc), fmt->pagewidth - spacel));
     }
     if (headerr) {
         int len = strlen(headerr);
-        int spacel = cfg->pagewidth - len;
+        int spacel = fmt->pagewidth - len;
         memcpy(line + spacel, headerr,
-            MIN(strlen(headerr), cfg->pagewidth - spacel));
+            MIN(strlen(headerr), fmt->pagewidth - spacel));
     }
 
     print_text_lf(line, o);
@@ -416,59 +416,59 @@ print_header(const doc_format_t *cfg, int page, FILE *o) {
 }
 
 void
-print_footer(const doc_format_t *cfg, int page, FILE *o) {
+print_footer(const doc_format_t *fmt, int page, FILE *o) {
     static char pagenumbuff[16], pagenumextbuff[16];
-    char *line = malloc(cfg->pagewidth + 1);
-    memset(line, ' ', cfg->pagewidth);
-    line[cfg->pagewidth + 1] = '\0';
+    char *line = malloc(fmt->pagewidth + 1);
+    memset(line, ' ', fmt->pagewidth);
+    line[fmt->pagewidth + 1] = '\0';
 
     snprintf(pagenumbuff, 16, "%d", page);
     snprintf(pagenumextbuff, 16, "PAGE %d", page);
 
     char *footerl = NULL, *footerc = NULL, *footerr = NULL;
    
-    if (cfg->footerl) {
-        if (strcmp(cfg->footerl, "pagenum") == 0)
+    if (fmt->footerl) {
+        if (strcmp(fmt->footerl, "pagenum") == 0)
             footerl = pagenumbuff;
-        else if (strcmp(cfg->footerl, "pagenumext") == 0)
+        else if (strcmp(fmt->footerl, "pagenumext") == 0)
             footerl = pagenumextbuff;
         else
-            footerl = cfg->footerl;
+            footerl = fmt->footerl;
     }
 
-    if (cfg->footerc) {
-        if (strcmp(cfg->footerc, "pagenum") == 0)
+    if (fmt->footerc) {
+        if (strcmp(fmt->footerc, "pagenum") == 0)
             footerc = pagenumbuff;
-        else if (strcmp(cfg->footerc, "pagenumext") == 0)
+        else if (strcmp(fmt->footerc, "pagenumext") == 0)
             footerc = pagenumextbuff;
         else
-            footerc = cfg->footerc;
+            footerc = fmt->footerc;
     }
 
-    if (cfg->footerr) {
-        if (strcmp(cfg->footerr, "pagenum") == 0)
+    if (fmt->footerr) {
+        if (strcmp(fmt->footerr, "pagenum") == 0)
             footerr = pagenumbuff;
-        else if (strcmp(cfg->footerr, "pagenumext") == 0)
+        else if (strcmp(fmt->footerr, "pagenumext") == 0)
             footerr = pagenumextbuff;
         else
-            footerr = cfg->footerr;
+            footerr = fmt->footerr;
     }
 
 
     if (footerl) {
-        memcpy(line, footerl, MIN(strlen(footerl), cfg->pagewidth));
+        memcpy(line, footerl, MIN(strlen(footerl), fmt->pagewidth));
     }
     if (footerc) {
         int len = strlen(footerc);
-        int spacel = (cfg->pagewidth - len) / 2;
+        int spacel = (fmt->pagewidth - len) / 2;
         memcpy(line + spacel, footerc,
-            MIN(strlen(footerc), cfg->pagewidth - spacel));
+            MIN(strlen(footerc), fmt->pagewidth - spacel));
     }
     if (footerr) {
         int len = strlen(footerr);
-        int spacel = cfg->pagewidth - len;
+        int spacel = fmt->pagewidth - len;
         memcpy(line + spacel, footerr,
-            MIN(strlen(footerr), cfg->pagewidth - spacel));
+            MIN(strlen(footerr), fmt->pagewidth - spacel));
     }
 
     print_text_lf(line, o);
@@ -478,26 +478,26 @@ print_footer(const doc_format_t *cfg, int page, FILE *o) {
 /* generation */
 
 void
-print_titlepage(const doc_format_t *cfg, int width, int height,
+print_titlepage(const doc_format_t *fmt, int width, int height,
     const docentry_t *tp, FILE *o)
 {
     /* center vertical */
     for (int i = 0; i < height / 3; i++)
         print_lf(o);
 
-    print_marginl(cfg, o);
-    print_centered_text_lf(cfg->title, width, o);
-    print_marginl(cfg, o);
-    print_centered_text_lf(cfg->author, width, o);
-    print_marginl(cfg, o);
-    print_centered_text_lf(cfg->date, width, o);
+    print_marginl(fmt, o);
+    print_centered_text_lf(fmt->title, width, o);
+    print_marginl(fmt, o);
+    print_centered_text_lf(fmt->author, width, o);
+    print_marginl(fmt, o);
+    print_centered_text_lf(fmt->date, width, o);
 }
 
 void
-print_tableofcontents(const doc_format_t *cfg, int width, int height,
+print_tableofcontents(const doc_format_t *fmt, int width, int height,
     int toplvl, const docentry_t *toc, const docentry_t *doc, FILE *o)
 {
-    print_marginl(cfg, o);
+    print_marginl(fmt, o);
     print_text_lf("TABLE OF CONTENTS", o);
 
     int indices[] = {
@@ -515,13 +515,13 @@ print_tableofcontents(const doc_format_t *cfg, int width, int height,
         for (int i = es->type + 1; i < 5; i++)
             indices[i] = 0;
 
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
         
         int charc = 0;
         /* print indices */
         for (int i = toplvl; i < es->type; i++) {
-            print_tab(cfg, o);
-            charc += cfg->tabstop;
+            print_tab(fmt, o);
+            charc += fmt->tabstop;
         }
         for (int i = toplvl; i <= es->type; i++)
             charc += fprintf(o, "%d.", indices[i]);
@@ -551,12 +551,12 @@ print_tableofcontents(const doc_format_t *cfg, int width, int height,
 }
 
 void
-print_structure(const doc_format_t *cfg, int width, int toplvl, int indices[5],
+print_structure(const doc_format_t *fmt, int width, int toplvl, int indices[5],
     const docentry_t *e, FILE *o)
 {
     int type = ((const docentry_structure_t*)e->data)->type;
 
-    print_marginl(cfg, o);
+    print_marginl(fmt, o);
 
     for (int i = toplvl; i <= type; i++)
         fprintf(o, "%d.", indices[i]);
@@ -568,24 +568,24 @@ print_structure(const doc_format_t *cfg, int width, int toplvl, int indices[5],
 }
 
 void
-print_paragraph(const doc_format_t *cfg, int width, const docentry_t *par,
+print_paragraph(const doc_format_t *fmt, int width, const docentry_t *par,
     FILE *o)
 {
     const char *s = par->data;
 
-    print_marginl(cfg, o);
+    print_marginl(fmt, o);
 
     /* indent */
     int firstlnw = width;
     if (par->efmt.indent && par->efmt.align != ACENTER) {
         if (par->efmt.align != ARIGHT)
-            print_tab(cfg, o);
-        firstlnw = width - cfg->tabstop;
+            print_tab(fmt, o);
+        firstlnw = width - fmt->tabstop;
     }
 
     s = print_ln(s, &par->efmt, firstlnw, o);
     while (s && *s) {
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
         s = print_ln(s, &par->efmt, width, o);
     }
 
@@ -593,7 +593,7 @@ print_paragraph(const doc_format_t *cfg, int width, const docentry_t *par,
 }
 
 void
-print_figure(const doc_format_t *cfg, int width, int fignum,
+print_figure(const doc_format_t *fmt, int width, int fignum,
 const docentry_t *fig, FILE *o)
 {
     docentry_figure_t *ef = (docentry_figure_t*)fig->data;
@@ -607,47 +607,47 @@ const docentry_t *fig, FILE *o)
         }
         int linelen = strpbrk(line, "\n\0") - line;
 
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
         if (fig->efmt.indent)
-            print_tab(cfg, o);
+            print_tab(fmt, o);
         fprintf(o, "%.*s", linelen, line);
 
         line += linelen;
     }
 
     if (ef->caption && *ef->caption) {
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
         if (fig->efmt.indent)
-            print_tab(cfg, o);
+            print_tab(fmt, o);
         fprintf(o, "Fig %d. %s\n", fignum, ef->caption);
     }
     print_lf(o);
 }
 
 void
-print_list(const doc_format_t *cfg, int width, const docentry_t *e, FILE *o) {
+print_list(const doc_format_t *fmt, int width, const docentry_t *e, FILE *o) {
     docentry_list_t* el = (docentry_list_t*)e->data;
-    print_marginl(cfg, o);
+    print_marginl(fmt, o);
     if (el->caption[0] != '\0')
         fprintf(o, "%s\n", el->caption);
     for (int i = 0; i < el->count; i++) {
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
         int fltab = 0;
         if (el->type == LITEMIZE) {
-            fltab = MAX(0, cfg->tabstop - 2);
+            fltab = MAX(0, fmt->tabstop - 2);
             print_n_c(' ', fltab, o);
             fltab += fprintf(o, "- ");
         } else {
-            fltab = MAX(0, cfg->tabstop - 2 - num_places(i + 1));
+            fltab = MAX(0, fmt->tabstop - 2 - num_places(i + 1));
             print_n_c(' ', fltab, o);
             fltab += fprintf(o, "%d. ", i + 1);
         }
         const char *s = el->items[i].content;
         s = print_ln(s, &e->efmt, width - fltab, o);
         while (s && *s) {
-            print_marginl(cfg, o);
-            print_tab(cfg, o);
-            s = print_ln(s, &e->efmt, width - cfg->tabstop, o);
+            print_marginl(fmt, o);
+            print_tab(fmt, o);
+            s = print_ln(s, &e->efmt, width - fmt->tabstop, o);
         }
         print_lf(o);
     }
@@ -657,12 +657,12 @@ print_list(const doc_format_t *cfg, int width, const docentry_t *e, FILE *o) {
 /* table stuff */
 
 void
-print_table_hbar(char bc, int ncols, int *col_widths, const doc_format_t *cfg,
+print_table_hbar(char bc, int ncols, int *col_widths, const doc_format_t *fmt,
     const docentry_format_t *efmt, FILE *o)
 {
-    print_marginl(cfg, o);
+    print_marginl(fmt, o);
     if (efmt->indent)
-        print_tab(cfg, o);
+        print_tab(fmt, o);
 
     for (int c = 0; c < ncols; c++) {
         fprintf(o, "+%c", bc);
@@ -674,16 +674,16 @@ print_table_hbar(char bc, int ncols, int *col_widths, const doc_format_t *cfg,
 
 void
 print_table_row(int ncols, int *col_widths, int row_height,
-    const char * const *cells, const doc_format_t *cfg,
+    const char * const *cells, const doc_format_t *fmt,
     const docentry_format_t *efmt, FILE *o)
 {
     const char **cell_curs = malloc(sizeof(char**) * ncols);
     memcpy(cell_curs, cells, sizeof(char**) * ncols);
 
     for (int l = 0; l < row_height; l++) {
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
         if (efmt->indent)
-            print_tab(cfg, o);
+            print_tab(fmt, o);
 
         for (int c = 0; c < ncols; c++) {
             fprintf(o, "| ");
@@ -696,61 +696,61 @@ print_table_row(int ncols, int *col_widths, int row_height,
 }
 
 void
-print_table(const doc_format_t *cfg, int width, int tnum, const docentry_t *e,
+print_table(const doc_format_t *fmt, int width, int tnum, const docentry_t *e,
     FILE *o)
 {
     docentry_table_t* et = (docentry_table_t*)e->data;
 
     /* top hbar */
-    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->efmt, o);
+    print_table_hbar('-', et->ncols, et->col_widths, fmt, &e->efmt, o);
     /* first row */
     print_table_row(et->ncols, et->col_widths, et->row_heights[0],
-        (const char **)&et->cells[0], cfg, &e->efmt, o);
+        (const char **)&et->cells[0], fmt, &e->efmt, o);
     /* header or normal hbar */
     if (et->has_header)
-        print_table_hbar('=', et->ncols, et->col_widths, cfg, &e->efmt, o);
+        print_table_hbar('=', et->ncols, et->col_widths, fmt, &e->efmt, o);
     for (int r = 1; r < et->nrows; r++) {
         /* rest of rows */
         print_table_row(et->ncols, et->col_widths, et->row_heights[r],
-            (const char **)&et->cells[r * et->ncols], cfg, &e->efmt, o);
+            (const char **)&et->cells[r * et->ncols], fmt, &e->efmt, o);
         /* after row hbar */
         if (et->has_interhbars && (r < et->nrows - 1))
-            print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->efmt, o);
+            print_table_hbar('-', et->ncols, et->col_widths, fmt, &e->efmt, o);
     }
     /* bottom hbar */
-    print_table_hbar('-', et->ncols, et->col_widths, cfg, &e->efmt, o);
+    print_table_hbar('-', et->ncols, et->col_widths, fmt, &e->efmt, o);
     /* table caption */
     if (et->caption && *et->caption != '\0') {
-        print_marginl(cfg, o);
+        print_marginl(fmt, o);
          if (e->efmt.indent)
-            print_tab(cfg, o);
+            print_tab(fmt, o);
         fprintf(o, "Table %d. %s\n", tnum, et->caption);
     }
     print_lf(o);
 }
 
 void
-generate_plain(const doc_format_t *cfg, docentry_t *doc, FILE *o) {
-    int width = cfg->pagewidth - cfg->marginl - cfg->marginr;
-    int height = cfg->pageheight - cfg->margint - cfg->marginb;
-    if (cfg->headerl) height -= 2;
-    if (cfg->footerl) height -= 2;
+generate_plain(const doc_format_t *fmt, docentry_t *doc, FILE *o) {
+    int width = fmt->pagewidth - fmt->marginl - fmt->marginr;
+    int height = fmt->pageheight - fmt->margint - fmt->marginb;
+    if (fmt->headerl) height -= 2;
+    if (fmt->footerl) height -= 2;
 
     int toplvl = find_toplvl_index(doc);
 
-    compute_layout(cfg, width, height, doc);
+    compute_layout(fmt, width, height, doc);
 
     for (const docentry_t *e = doc; e != NULL; e = e->n) {
         /* first page header */
         if (e == doc) {
-            print_header(cfg, e->page, o);
-            print_margint(cfg, o);
+            print_header(fmt, e->page, o);
+            print_margint(fmt, o);
         }
 
         switch (e->type) {
             case ENULL: break;
             case EPARAGRAPH: {
-                print_paragraph(cfg, width, e, o);
+                print_paragraph(fmt, width, e, o);
                 //linec += e->height + 1; /* interparagraph margin */
             } break;
             case ESTRUCTURE: {
@@ -760,21 +760,21 @@ generate_plain(const doc_format_t *cfg, docentry_t *doc, FILE *o) {
                 for (int i = type + 1; i < 5; i++)
                     indices[i] = 0;
 
-                print_structure(cfg, width, toplvl, indices, e, o);
+                print_structure(fmt, width, toplvl, indices, e, o);
                 //linec += e->height; 
 
             } break;
             case ETITLEPAGE: {
-                print_titlepage(cfg, width, height, e, o);
+                print_titlepage(fmt, width, height, e, o);
                 //linec = height; /* force new page */
             } break;
             case ETABLEOFCONTENTS: {
-                print_tableofcontents(cfg, width, height, toplvl, e, doc, o);
+                print_tableofcontents(fmt, width, height, toplvl, e, doc, o);
                 //linec = height; /* force new page */
             } break;
             case EFIGURE: {
                 static int fignum = 1;
-                print_figure(cfg, width, fignum, e, o);
+                print_figure(fmt, width, fignum, e, o);
                 if (strlen(((docentry_figure_t*)e->data)->caption) > 0)
                     fignum++;
             } break;
@@ -782,11 +782,11 @@ generate_plain(const doc_format_t *cfg, docentry_t *doc, FILE *o) {
                 //linec = height;
             } break;
             case ELIST: {
-                print_list(cfg, width, e, o);
+                print_list(fmt, width, e, o);
             } break;
             case ETABLE: {
                 static int tnum = 1;
-                print_table(cfg, width, tnum, e, o);
+                print_table(fmt, width, tnum, e, o);
                 if (strlen(((docentry_table_t*)e->data)->caption) > 0)
                     tnum++;
             } break;
@@ -794,13 +794,13 @@ generate_plain(const doc_format_t *cfg, docentry_t *doc, FILE *o) {
 
         /* end page, next one */
         if (e->n && (e->page < e->n->page)) {
-            print_marginb(cfg, o);
-            if (cfg->footerl)
-                print_footer(cfg, e->page, o);
+            print_marginb(fmt, o);
+            if (fmt->footerl)
+                print_footer(fmt, e->page, o);
             print_pb(o);
-            if (cfg->headerl)
-                print_header(cfg, e->n->page, o);
-            print_margint(cfg, o);
+            if (fmt->headerl)
+                print_header(fmt, e->n->page, o);
+            print_margint(fmt, o);
         }
     }
 }

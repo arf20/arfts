@@ -62,18 +62,18 @@ doc_print(const docentry_t *doc) {
 }
 
 void
-docconfig_print(const doc_format_t *cfg) {
+docconfig_print(const doc_format_t *fmt) {
     fprintf(stderr,
         "doc config:\n page dimensions: %dx%d\n tabstop: %s\n"
         " margins: %d %d %d %d\n"
         " header: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
         " footer: (left) \"%s\" (center) \"%s\" (right) \"%s\"\n"
         " title: %s\n author: %s\n date: %s\n",
-        cfg->pagewidth, cfg->pageheight, cfg->tabstop ? "true" : "false",
-        cfg->margint, cfg->marginl, cfg->marginb, cfg->marginr,
-        cfg->headerl, cfg->headerc, cfg->headerr,
-        cfg->footerl, cfg->footerc, cfg->footerr,
-        cfg->title, cfg->author, cfg->date
+        fmt->pagewidth, fmt->pageheight, fmt->tabstop ? "true" : "false",
+        fmt->margint, fmt->marginl, fmt->marginb, fmt->marginr,
+        fmt->headerl, fmt->headerc, fmt->headerr,
+        fmt->footerl, fmt->footerc, fmt->footerr,
+        fmt->title, fmt->author, fmt->date
     );
 }
 
@@ -145,19 +145,19 @@ main(int argc, char **argv) {
     }
 
 
-    doc_format_t cfg = { 80, 137, 4, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL,
+    doc_format_t fmt = { 80, 137, 4, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL};
     docentry_t *doc = doc_new();
-    parse_file(inputbuff, &cfg, doc);
+    parse_file(inputbuff, &fmt, doc);
 
     free(inputbuff);
 
-    generate_plain(&cfg, doc, output);
+    generate_plain(&fmt, doc, output);
 
     /* debug */
     if (debug) {
         doc_print(doc); 
-        docconfig_print(&cfg);
+        docconfig_print(&fmt);
     }
 
     return 0;

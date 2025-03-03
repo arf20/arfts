@@ -8,18 +8,18 @@
 #include "doc.h"
 
 void
-cmd_pagewidth(const char *args, state_t *st, doc_format_t *cfg) {
-    cfg->pagewidth = strtol(args, NULL, 10);
+cmd_pagewidth(const char *args, state_t *st, doc_format_t *fmt) {
+    fmt->pagewidth = strtol(args, NULL, 10);
 }
 
 void
-cmd_pageheight(const char *args, state_t *st, doc_format_t *cfg) {
-    cfg->pageheight = strtol(args, NULL, 10);
+cmd_pageheight(const char *args, state_t *st, doc_format_t *fmt) {
+    fmt->pageheight = strtol(args, NULL, 10);
 }
 
 void
-cmd_tabstop(const char *args, state_t *st, doc_format_t *cfg) {
-    cfg->tabstop = strtol(args, NULL, 10);
+cmd_tabstop(const char *args, state_t *st, doc_format_t *fmt) {
+    fmt->tabstop = strtol(args, NULL, 10);
 }
 
 void
@@ -32,24 +32,24 @@ cmd_indent(const char *args, state_t *st, docentry_format_t *efmt) {
 }
 
 void
-cmd_header(const char *args, state_t *st, doc_format_t *cfg) {
+cmd_header(const char *args, state_t *st, doc_format_t *fmt) {
     char *tok1, *tok2, *tok3;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
     args = tokenize(args, &tok3);
 
-    if (cfg->headerl || cfg->headerc || cfg->headerr)
+    if (fmt->headerl || fmt->headerc || fmt->headerr)
         fprintf(stderr, "L%d: (W) Header redefined\n", st->linenum);
 
     if (tok1 && tok2 && tok3) {
-        cfg->headerl = tok1;
-        cfg->headerc = tok2;
-        cfg->headerr = tok3;
+        fmt->headerl = tok1;
+        fmt->headerc = tok2;
+        fmt->headerr = tok3;
     } else if (tok1 && tok2) {
-        cfg->headerl = tok1;
-        cfg->headerr = tok2;
+        fmt->headerl = tok1;
+        fmt->headerr = tok2;
     } else if (tok1) {
-        cfg->headerl = tok1;
+        fmt->headerl = tok1;
     } else {
         fprintf(stderr, "L%d: (E) Too few arguments for .header\n",
             st->linenum);
@@ -57,24 +57,24 @@ cmd_header(const char *args, state_t *st, doc_format_t *cfg) {
 }
 
 void
-cmd_footer(const char *args, state_t *st, doc_format_t *cfg) {
+cmd_footer(const char *args, state_t *st, doc_format_t *fmt) {
     char *tok1, *tok2, *tok3;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
     args = tokenize(args, &tok3);
 
-    if (cfg->footerl || cfg->footerc || cfg->footerr)
+    if (fmt->footerl || fmt->footerc || fmt->footerr)
         fprintf(stderr, "L%d: (W) Footer redefined\n", st->linenum);
 
     if (tok1 && tok2 && tok3) {
-        cfg->footerl = tok1;
-        cfg->footerc = tok2;
-        cfg->footerr = tok3;
+        fmt->footerl = tok1;
+        fmt->footerc = tok2;
+        fmt->footerr = tok3;
     } else if (tok1 && tok2) {
-        cfg->footerl = tok1;
-        cfg->footerr = tok2;
+        fmt->footerl = tok1;
+        fmt->footerr = tok2;
     } else if (tok1) {
-        cfg->footerl = tok1;
+        fmt->footerl = tok1;
     } else {
         fprintf(stderr, "L%d: (E) Too few arguments for .footer\n",
             st->linenum);
@@ -82,7 +82,7 @@ cmd_footer(const char *args, state_t *st, doc_format_t *cfg) {
 }
 
 void
-cmd_margin(const char *args, state_t *st, doc_format_t *cfg) {
+cmd_margin(const char *args, state_t *st, doc_format_t *fmt) {
     char *tok1, *tok2, *tok3, *tok4;
     args = tokenize(args, &tok1);
     args = tokenize(args, &tok2);
@@ -95,31 +95,31 @@ cmd_margin(const char *args, state_t *st, doc_format_t *cfg) {
         return;
     }
 
-    cfg->margint = strtol(tok1, NULL, 0);
-    cfg->marginl = strtol(tok2, NULL, 0);
-    cfg->marginb = strtol(tok3, NULL, 0);
-    cfg->marginr = strtol(tok4, NULL, 0);
+    fmt->margint = strtol(tok1, NULL, 0);
+    fmt->marginl = strtol(tok2, NULL, 0);
+    fmt->marginb = strtol(tok3, NULL, 0);
+    fmt->marginr = strtol(tok4, NULL, 0);
 }
 
 void
-cmd_title(const char *args, state_t *st, doc_format_t *cfg) {
+cmd_title(const char *args, state_t *st, doc_format_t *fmt) {
     args = strip(args);
     const char *end = strchr(args, '\n');
-    cfg->title = strndup(args, end - args);
+    fmt->title = strndup(args, end - args);
 }
 
 void
-cmd_author(const char *args, state_t *st, doc_format_t *cfg) {
+cmd_author(const char *args, state_t *st, doc_format_t *fmt) {
     args = strip(args);
     const char *end = strchr(args, '\n');
-    cfg->author = strndup(args, end - args);
+    fmt->author = strndup(args, end - args);
 }
 
 void
-cmd_date(const char *args, state_t *st, doc_format_t *cfg) {
+cmd_date(const char *args, state_t *st, doc_format_t *fmt) {
     args = strip(args);
     const char *end = strchr(args, '\n');
-    cfg->date = strndup(args, end - args);
+    fmt->date = strndup(args, end - args);
 }
 
 void
@@ -239,7 +239,7 @@ cmd_table(const char *args, state_t *st, const docentry_format_t *efmt,
 
 
 const char*
-interpret_command(const char *cmd, doc_format_t *cfg, docentry_format_t *efmt,
+interpret_command(const char *cmd, doc_format_t *fmt, docentry_format_t *efmt,
     state_t *st, docentry_t **e)
 {
     const char *cmdend = strpbrk(cmd, " \n");
@@ -252,25 +252,25 @@ interpret_command(const char *cmd, doc_format_t *cfg, docentry_format_t *efmt,
     #endif /* _DEBUG_STATE_ */
 
     if      (strncmp(cmd, ".pagewidth", cmdlen) == 0)
-        cmd_pagewidth(cmd + cmdlen, st, cfg);
+        cmd_pagewidth(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".pageheight", cmdlen) == 0)
-        cmd_pageheight(cmd + cmdlen, st, cfg);
+        cmd_pageheight(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".tabstop", cmdlen) == 0)
-        cmd_tabstop(cmd + cmdlen, st, cfg);
+        cmd_tabstop(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".indent", cmdlen) == 0)
         cmd_indent(cmd + cmdlen, st, efmt);
     else if (strncmp(cmd, ".header", cmdlen) == 0)
-        cmd_header(cmd + cmdlen, st, cfg);
+        cmd_header(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".footer", cmdlen) == 0)
-        cmd_footer(cmd + cmdlen, st, cfg);
+        cmd_footer(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".margin", cmdlen) == 0)
-        cmd_margin(cmd + cmdlen, st, cfg);
+        cmd_margin(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".title", cmdlen) == 0)
-        cmd_title(cmd + cmdlen, st, cfg);
+        cmd_title(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".author", cmdlen) == 0)
-        cmd_author(cmd + cmdlen, st, cfg);
+        cmd_author(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".date", cmdlen) == 0)
-        cmd_date(cmd + cmdlen, st, cfg);
+        cmd_date(cmd + cmdlen, st, fmt);
     else if (strncmp(cmd, ".titlepage", cmdlen) == 0)
         cmd_titlepage(cmd + cmdlen, e);
     else if (strncmp(cmd, ".pagebreak", cmdlen) == 0)

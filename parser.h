@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-void parse_file(const char *src, doc_format_t *cfg, docentry_t *doc);
+void parse_file(const char *src, doc_format_t *fmt, docentry_t *doc);
 
 #endif /* _PARSER_H */
 

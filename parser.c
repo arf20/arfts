@@ -146,7 +146,7 @@ item_add_word(docentry_t *e, state_t *st, const char *wordoff) {
 }
 
 void
-parse_file(const char *src, doc_format_t *cfg, docentry_t *doc) {
+parse_file(const char *src, doc_format_t *fmt, docentry_t *doc) {
     const char *cursor = src;
 
     state_t st = { 1, 1, 0, 0, 0 };
@@ -173,7 +173,7 @@ parse_file(const char *src, doc_format_t *cfg, docentry_t *doc) {
 
         if (st.prev_nl && *cursor == '.') {
             /* command */
-            cursor = interpret_command(cursor, cfg, &efmt, &st, &cur_entry);
+            cursor = interpret_command(cursor, fmt, &efmt, &st, &cur_entry);
         } else if (*cursor == '\n') {
             cursor++;
             st.linenum++;
