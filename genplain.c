@@ -651,6 +651,7 @@ print_list(const doc_format_t *fmt, int width, const docentry_t *e, FILE *o) {
         }
         const char *s = el->items[i].content;
         s = print_ln(s, &e->efmt, width - fltab, o);
+        s = strip(s);
         while (s && *s) {
             print_marginl(fmt, o);
             print_tab(fmt, o);
