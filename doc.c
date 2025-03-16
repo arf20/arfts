@@ -267,9 +267,13 @@ doc_insert_bibliography(docentry_t *e, const docentry_format_t *efmt) {
     docentry_t *newe = doc_insert_entry(e, efmt, EBIBLIOGRAPHY);
 
     newe->height = 0;
-    newe->data = malloc(0);
-    newe->size = newe->capacity = 0;
+    newe->data = malloc(sizeof(docentry_bibliography_t));
+    newe->size = newe->capacity = sizeof(docentry_bibliography_t);
    
+    docentry_bibliography_t* eb = (docentry_bibliography_t*)e->data;
+    eb->count = 0;
+    eb->refs = malloc(0);
+
     return newe;
 }
 

@@ -20,7 +20,7 @@ void
 doc_print(const docentry_t *doc) {
     int i = 0;
     for (const docentry_t *e = doc; e != NULL; e = e->n, i++) {
-        fprintf(stderr, " doc[I%d,P%d,L%d][%dx%d]: %s",
+        fprintf(stderr, " doc[N%d,P%d,L%d][%dx%d]: %s",
             i, e->page, e->line, e->width, e->height, entrytype_names[e->type]);
         switch (e->type) {
             case ENULL: break;

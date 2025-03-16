@@ -292,7 +292,7 @@ cmd_refdef(const char *args, state_t *st, const docentry_format_t *efmt,
     const char *end = strchr(args, '\n');
     const char *refnameend = strchr(args, ' ');
     const char *refname = strndup(args, refnameend - args);
-    const char *citation = strndup(refnameend + 1, end - refnameend + 1);
+    const char *citation = strndup(refnameend + 1, end - refnameend - 1);
     doc_bibliography_insert(*e, refname, citation);
     return end + 1;
 }
@@ -365,7 +365,8 @@ interpret_command(const char *cmd, doc_format_t *fmt, docentry_format_t *efmt,
         /* implemented in parser */
     else if (strncmp(cmd, ".bibliography", cmdlen) == 0)
         end = cmd_bibliography(cmd + cmdlen, st, efmt, e);
-    else if (strncmp(cmd, ".refdef", cmdlen) == 0) {}
+    else if (strncmp(cmd, ".refdef", cmdlen) == 0)
+        end = cmd_refdef(cmd + cmdlen, st, efmt, e);
     else if (strncmp(cmd, ".footnotedef", cmdlen) == 0) {}
     else
         fprintf(stderr, "L%d: (W) Unrecognized command: %.*s\n", st->linenum,

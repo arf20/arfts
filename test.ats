@@ -14,7 +14,7 @@
 .author Angel Ruiz Fernandez
 .date 12-12-2024
 
-.align right
+.align left
 
 .titlepage
 
@@ -75,6 +75,8 @@ BBB
       CCC
 .!fig
 
+alifhjwoigwheoigwheio
+
 .itemize
 .item first item
 .item second item
@@ -84,4 +86,8 @@ BBB
 .item first
 .item second
 .item thirdkjshfoid
+
+
+.bibliography
+.refdef ref1 This is a citation to a dream
 
