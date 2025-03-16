@@ -128,9 +128,15 @@ compute_layout(const doc_format_t *fmt, int width, int height, docentry_t *doc) 
                 if (el->caption[0] == '\0')
                     e->height++;
                 for (int i = 0; i < el->count; i++) {
-                    e->height += text_countlines(width, e->efmt.indent,
+                    int itemheight = text_countlines(width, e->efmt.indent,
                         fmt->tabstop, el->items[i].content);
+                    e->height += itemheight;
+                    if (itemheight > 1)
+                        el->itemspacing = 1;
                 }
+
+                if (el->itemspacing)
+                    e->height += el->count;
 
                 if (line + e->height >= height) {
                     page++;
@@ -627,9 +633,10 @@ const docentry_t *fig, FILE *o)
 void
 print_list(const doc_format_t *fmt, int width, const docentry_t *e, FILE *o) {
     docentry_list_t* el = (docentry_list_t*)e->data;
-    print_marginl(fmt, o);
-    if (el->caption[0] != '\0')
+    if (el->caption[0] != '\0') {
+        print_marginl(fmt, o);
         fprintf(o, "%s\n", el->caption);
+    }
     for (int i = 0; i < el->count; i++) {
         print_marginl(fmt, o);
         int fltab = 0;
@@ -649,7 +656,8 @@ print_list(const doc_format_t *fmt, int width, const docentry_t *e, FILE *o) {
             print_tab(fmt, o);
             s = print_ln(s, &e->efmt, width - fmt->tabstop, o);
         }
-        print_lf(o);
+        if (el->itemspacing)
+            print_lf(o);
     }
     print_lf(o);
 }
