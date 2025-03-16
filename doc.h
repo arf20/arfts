@@ -30,7 +30,8 @@ typedef enum {
     EPAGEBREAK,
     ETABLEOFCONTENTS,
     ELIST,
-    ETABLE
+    ETABLE,
+    EBIBLIOGRAPHY
 } entrytype_t;
 
 extern const char *entrytype_names[];
@@ -82,6 +83,7 @@ typedef struct {
     list_type_t type;
     const char *caption;
     size_t count;
+    int itemspacing;
     docentry_list_item_t *items;
 } docentry_list_t;
 
@@ -92,6 +94,16 @@ typedef struct {
     char **cells; /* r*W + c */
     int *col_widths, *row_heights;
 } docentry_table_t;
+
+
+typedef struct {
+    const char *refname, *citation;
+} docentry_bibliography_ref_t;
+
+typedef struct {
+    int count;
+    docentry_bibliography_ref_t *refs;
+} docentry_bibliography_t;
 
 
 docentry_t *doc_new();
@@ -109,6 +121,10 @@ docentry_t *doc_insert_list(docentry_t *e, const docentry_format_t *efmt,
 void doc_list_insert(docentry_t *e);
 docentry_t *doc_insert_table(docentry_t *e, const docentry_format_t *efmt,
     const char *caption);
+docentry_t *doc_insert_bibliography(docentry_t *e,
+    const docentry_format_t *efmt);
+void doc_bibliography_insert(docentry_t *e, const char *refname,
+    const char *citation);
 
 #endif /* _DOC_H */
 

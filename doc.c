@@ -13,7 +13,8 @@ const char *entrytype_names[] = {
     "pagebreak",
     "tableofcontents",
     "list",
-    "table"
+    "table",
+    "bibliography"
 };
 
 const char *structuretype_names[] = {
@@ -23,6 +24,26 @@ const char *structuretype_names[] = {
     "subsection",
     "subsubsection"
 };
+
+docentry_t*
+doc_insert_entry(docentry_t *e, const docentry_format_t *efmt,
+    entrytype_t type)
+{
+    docentry_t *newe = NULL;
+    if (e->type == ENULL) {
+        /* morph curr null entry into a paragraph */
+        newe = e;
+    } else {
+        newe = malloc(sizeof(docentry_t));
+        memset(newe, 0, sizeof(docentry_t));
+        newe->n = NULL;
+        e->n = newe;
+    }
+    newe->type = type;
+    newe->efmt = *efmt;
+
+    return newe;
+}
 
 docentry_t*
 doc_new() {
@@ -194,6 +215,7 @@ doc_insert_list(docentry_t *e, const docentry_format_t *efmt, list_type_t type,
     el->type = type;
     el->caption = caption;
     el->count = 0;
+    el->itemspacing = 0;
     el->items = NULL;
 
     return newe;
@@ -210,6 +232,7 @@ doc_list_insert(docentry_t *e) {
     li->size = 0;
     li->capacity = EPARAGRAPH_INITIAL_CAPACITY;
     li->content = malloc(EPARAGRAPH_INITIAL_CAPACITY);
+    li->content[0] = '\0';
 }
 
 docentry_t*
@@ -237,5 +260,30 @@ const char *caption)
     et->cells = NULL;
 
     return newe;
+}
+
+docentry_t *
+doc_insert_bibliography(docentry_t *e, const docentry_format_t *efmt) {
+    docentry_t *newe = doc_insert_entry(e, efmt, EBIBLIOGRAPHY);
+
+    newe->height = 0;
+    newe->data = malloc(0);
+    newe->size = newe->capacity = 0;
+   
+    return newe;
+}
+
+void
+doc_bibliography_insert(docentry_t *e, const char *refname,
+    const char *citation)
+{
+    if (e->type != EBIBLIOGRAPHY)
+        return;
+    docentry_bibliography_t* eb = (docentry_bibliography_t*)e->data;
+    eb->count++;
+    eb->refs = realloc(eb->refs, sizeof(docentry_list_item_t) * eb->count);
+    docentry_bibliography_ref_t *br = &eb->refs[eb->count - 1];
+    br->refname = refname;
+    br->citation = citation;
 }
 

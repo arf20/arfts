@@ -36,8 +36,8 @@ middle argument is center aligned if present.
 
 args:
  - "\<str>": quoted string
- - pagenum: page number
- - pagenumext: page number preceded by "PAGE "
+ - .pagenum: page number
+ - .pagenumlbl: page number preceded by "PAGE "
 
 warns:
  - linebreak
@@ -150,9 +150,11 @@ Preformat block for whatever
 
 Inserts bibliography section page(s)
 
-### .refdef \<refname> \<idk ill figure it out later>
+### .refdef \<refname or .> \<citation>
 
 Defines bibliography entry to be inserted at .bibliography
+
+refname: name without space or . for autoincrement in appearence order
 
 ### .footnotedef \<footnotename> \<text>
 

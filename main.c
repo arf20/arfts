@@ -24,6 +24,9 @@ doc_print(const docentry_t *doc) {
             i, e->page, e->line, e->width, e->height, entrytype_names[e->type]);
         switch (e->type) {
             case ENULL: break;
+            case ETITLEPAGE: break;
+            case ETABLEOFCONTENTS: break;
+            case EPAGEBREAK: break;
             case EPARAGRAPH: {
                 fprintf(stderr, " \"%.*s\"", (int)e->size, e->data);
             } break;
@@ -51,11 +54,15 @@ doc_print(const docentry_t *doc) {
                     }
                     fputc('\n', stderr);
                 }
-
-             } break;
-            case ETITLEPAGE: break;
-            case EPAGEBREAK: break;
-            case ETABLEOFCONTENTS: break;
+            } break;
+            case EBIBLIOGRAPHY: {
+                docentry_bibliography_t *eb = (docentry_bibliography_t*)e->data;
+                fputc('\n', stderr);
+                for (int r = 0; r < eb->count; r++) {
+                    docentry_bibliography_ref_t ebr = eb->refs[r];
+                    fprintf(stderr, "%s: %s\n", ebr.refname, ebr.citation);
+                }
+            } break;
         }
         fputc('\n', stderr);
     }
