@@ -41,7 +41,7 @@ doc_print(const docentry_t *doc) {
             } break;
             case ELIST: {
                 docentry_list_t* el = (docentry_list_t*)e->data;
-                fputc('\n', stderr);
+                fprintf(stderr, " %s\n", listtype_names[el->type]);
                 for (size_t j = 0; j < el->count; j++)
                     fprintf(stderr, "-> %s\n", el->items[j].content);
             } break;

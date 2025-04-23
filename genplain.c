@@ -125,7 +125,7 @@ compute_layout(const doc_format_t *fmt, int width, int height, docentry_t *doc) 
                 docentry_list_t* el = (docentry_list_t*)e->data;
 
                 e->height = 0;
-                if (el->caption[0] == '\0')
+                if (el->caption && el->caption[0] != '\0')
                     e->height++;
                 for (int i = 0; i < el->count; i++) {
                     int itemheight = text_countlines(width, e->efmt.indent,
@@ -633,7 +633,7 @@ const docentry_t *fig, FILE *o)
 void
 print_list(const doc_format_t *fmt, int width, const docentry_t *e, FILE *o) {
     docentry_list_t* el = (docentry_list_t*)e->data;
-    if (el->caption[0] != '\0') {
+    if (el->caption && el->caption[0] != '\0') {
         print_marginl(fmt, o);
         fprintf(o, "%s\n", el->caption);
     }
@@ -784,7 +784,9 @@ generate_plain(const doc_format_t *fmt, docentry_t *doc, FILE *o) {
             case EFIGURE: {
                 static int fignum = 1;
                 print_figure(fmt, width, fignum, e, o);
-                if (strlen(((docentry_figure_t*)e->data)->caption) > 0)
+                const docentry_figure_t* fig =
+                    (const docentry_figure_t*)e->data;
+                if (fig->caption && fig->caption[0] != '\0')
                     fignum++;
             } break;
             case EPAGEBREAK: {

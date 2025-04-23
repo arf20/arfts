@@ -74,6 +74,8 @@ typedef enum {
     LENUMERATE
 } list_type_t;
 
+extern const char *listtype_names[];
+
 typedef struct {
     int size, capacity;
     char *content;

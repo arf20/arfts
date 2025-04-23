@@ -25,6 +25,12 @@ const char *structuretype_names[] = {
     "subsubsection"
 };
 
+const char *listtype_names[] = {
+    "itemize",
+    "enumerate"
+};
+
+
 docentry_t*
 doc_insert_entry(docentry_t *e, const docentry_format_t *efmt,
     entrytype_t type)
@@ -185,7 +191,7 @@ const char *caption)
     newe->data = malloc(newe->size = sizeof(docentry_figure_t));
     newe->size = newe->capacity = sizeof(docentry_figure_t);
     
-    docentry_figure_t* ef = (docentry_figure_t*)e->data;
+    docentry_figure_t* ef = (docentry_figure_t*)newe->data;
     ef->caption = caption;
     ef->predata = NULL;
 
@@ -211,7 +217,7 @@ doc_insert_list(docentry_t *e, const docentry_format_t *efmt, list_type_t type,
     newe->data = malloc(newe->size = sizeof(docentry_list_t));
     newe->size = newe->capacity = sizeof(docentry_list_t);
     
-    docentry_list_t* el = (docentry_list_t*)e->data;
+    docentry_list_t* el = (docentry_list_t*)newe->data;
     el->type = type;
     el->caption = caption;
     el->count = 0;
@@ -254,7 +260,7 @@ const char *caption)
     newe->data = malloc(newe->size = sizeof(docentry_table_t));
     newe->size = newe->capacity = sizeof(docentry_table_t);
     
-    docentry_table_t* et = (docentry_table_t*)e->data;
+    docentry_table_t* et = (docentry_table_t*)newe->data;
     et->caption = caption;
     et->ncols = et->nrows = 0;
     et->cells = NULL;
@@ -270,7 +276,7 @@ doc_insert_bibliography(docentry_t *e, const docentry_format_t *efmt) {
     newe->data = malloc(sizeof(docentry_bibliography_t));
     newe->size = newe->capacity = sizeof(docentry_bibliography_t);
    
-    docentry_bibliography_t* eb = (docentry_bibliography_t*)e->data;
+    docentry_bibliography_t* eb = (docentry_bibliography_t*)newe->data;
     eb->count = 0;
     eb->refs = malloc(0);
 
