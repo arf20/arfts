@@ -579,20 +579,28 @@ print_paragraph(const doc_format_t *fmt, int width, const docentry_t *par,
 {
     const char *s = par->data;
 
+    docentry_format_t efmt = par->efmt;
+
     print_marginl(fmt, o);
 
     /* indent */
     int firstlnw = width;
-    if (par->efmt.indent && par->efmt.align != ACENTER) {
-        if (par->efmt.align != ARIGHT)
+    if (efmt.indent && efmt.align != ACENTER) {
+        if (efmt.align != ARIGHT)
             print_tab(fmt, o);
         firstlnw = width - fmt->tabstop;
     }
 
-    s = print_ln(s, &par->efmt, firstlnw, o);
+    /* first line */
+    if (efmt.align == AJUSTIFY && strlen(s) <= width)
+        efmt.align = ALEFT; /* when justified, last line is left alig*/
+    s = print_ln(s, &efmt, firstlnw, o);
+
     while (s && *s) {
         print_marginl(fmt, o);
-        s = print_ln(s, &par->efmt, width, o);
+        if (efmt.align == AJUSTIFY && strlen(s) <= width)
+            efmt.align = ALEFT; /* when justified, last line is left alig*/
+        s = print_ln(s, &efmt, width, o);
     }
 
     print_lf(o);
