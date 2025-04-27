@@ -11,28 +11,25 @@
 
 int
 text_countlines(int width, int indent, int tabstop, const char *text) {
-    const char *s = strip(text), *next;
-    int linec = 1, charc = -1; /* starts w no preword space */
-    while (s && *s) {
-        next = strchr(s, ' ');
-        if (!next) {
-            charc += strlen(s);
-            next = (const char *)-1;
+    const char *pos = text;
+    int lines = 0;
+    while (pos && *pos) {
+        int lwlen = 0, llen = 0, gaps = 0;
+        /* count words that fit in the line */
+        int lwidth = lines == 0 && indent ? width - tabstop : width;
+        while (pos != (void*)1 && *pos != '\0') {
+            const char *next = strpbrk(pos, " \0");
+            int wlen = count_utf8_code_points_n(pos, next - pos);
+            if (lwlen + wlen > lwidth)
+                break;
+            lwlen += wlen + 1;
+            llen += next - pos + 1;
+            gaps++;
+            pos = next + 1;
         }
-
-        if (((charc + (next - s) + 1) > width) || (linec == 0 && indent &&
-            (charc + tabstop + (next - s) + 1) > width))
-        {
-            linec++;
-            charc = -1;
-        }
- 
-        charc += (next - s) + 1;
-
-        s = strip(next + 1);
+        lines++;
     }
-
-    return linec;
+    return lines;
 }
 
 int
@@ -112,6 +109,9 @@ compute_layout(const doc_format_t *fmt, int width, int height, docentry_t *doc) 
                         col++;
                 }
 
+                if (ef->caption && *ef->caption)
+                    e->height++;
+
                 if (line + e->height >= height) {
                     page++;
                     line = 0;
@@ -124,7 +124,7 @@ compute_layout(const doc_format_t *fmt, int width, int height, docentry_t *doc) 
             case ELIST: {
                 docentry_list_t* el = (docentry_list_t*)e->data;
 
-                e->height = 0;
+                e->height = 1; /* bottom margin */
                 if (el->caption && el->caption[0] != '\0')
                     e->height++;
                 for (int i = 0; i < el->count; i++) {
@@ -658,12 +658,17 @@ print_list(const doc_format_t *fmt, int width, const docentry_t *e, FILE *o) {
             fltab += fprintf(o, "%d. ", i + 1);
         }
         const char *s = el->items[i].content;
-        s = print_ln(s, &e->efmt, width - fltab, o);
+        docentry_format_t efmt = e->efmt;
+        if (strlen(s) <= width) /* left align if one line */
+            efmt.align = ALEFT;
+        s = print_ln(s, &efmt, width - fltab, o);
         s = strip(s);
         while (s && *s) {
             print_marginl(fmt, o);
             print_tab(fmt, o);
-            s = print_ln(s, &e->efmt, width - fmt->tabstop, o);
+            if (strlen(s) <= width) /* left align if last line */
+                efmt.align = ALEFT;
+            s = print_ln(s, &efmt, width - fmt->tabstop, o);
         }
         if (el->itemspacing)
             print_lf(o);
@@ -750,8 +755,8 @@ void
 generate_plain(const doc_format_t *fmt, docentry_t *doc, FILE *o) {
     int width = fmt->pagewidth - fmt->marginl - fmt->marginr;
     int height = fmt->pageheight - fmt->margint - fmt->marginb;
-    if (fmt->headerl) height -= 2;
-    if (fmt->footerl) height -= 2;
+    if (fmt->headerl) height -= 1;
+    if (fmt->footerl) height -= 1;
 
     int toplvl = find_toplvl_index(doc);
 

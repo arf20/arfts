@@ -12,7 +12,10 @@
 
 void
 usage(char *argv0) {
-    printf("usage: %s <input> <output>\n\n", argv0);
+    printf("usage: %s [-o|d|h] [input]\n"
+           "  -o|--output <file>    output file\n"
+           "  -d|--debug            enable debug\n"
+           "  -h|--help             display this\n", argv0);
     exit(1);
 }
 
@@ -92,13 +95,20 @@ main(int argc, char **argv) {
     int debug = 0;
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-o") == 0) {
+        if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0) {
             if (i + 1 >= argc)
                 usage(*argv);
             outputstr = argv[i + 1];
             i++;
-        } else if (strcmp(argv[i], "-d") == 0)
+        } else if (strcmp(argv[i], "-d") == 0
+            || strcmp(argv[i], "--debug") == 0)
+        {
             debug = 1;
+        } else if (strcmp(argv[i], "-h") == 0
+            || strcmp(argv[i], "--help") == 0)
+        {
+            usage(*argv);
+        }
         else if (!inputstr)
             inputstr = argv[i];
         else
@@ -124,6 +134,11 @@ main(int argc, char **argv) {
 
     } else {
         input = fopen(inputstr, "r");
+        if (!input) {
+            fprintf(stderr, "error opening %s: %s\n",
+                inputstr, strerror(errno));
+            exit(1);
+        }
 
         fseek(input, 0, SEEK_END); 
         size_t size = ftell(input);
