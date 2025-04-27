@@ -54,7 +54,7 @@ compute_layout(const doc_format_t *fmt, int width, int height, docentry_t *doc) 
                 e->height = text_countlines(width, e->efmt.indent,
                     fmt->tabstop, e->data) + 1; /* 1 line margin */
                 e->width = width;
-                if (line + e->height > height) {
+                if (line + e->height >= height) {
                     page++;
                     line = 0;
 
@@ -612,6 +612,10 @@ const docentry_t *fig, FILE *o)
 {
     docentry_figure_t *ef = (docentry_figure_t*)fig->data;
     const char *line = ef->predata;
+    int cropped = 0;
+
+    if (fig->efmt.indent)
+        width -= fmt->tabstop;
 
     while (line && *line) {
         if (*line == '\n') {
@@ -620,13 +624,19 @@ const docentry_t *fig, FILE *o)
             continue;
         }
         int linelen = strpbrk(line, "\n\0") - line;
+        int printlen = 0;
+        if (count_utf8_code_points_n(line, linelen) > width) {
+            printlen = width;
+            cropped = 1;
+        } else
+            printlen = linelen;
 
         print_marginl(fmt, o);
         if (fig->efmt.indent)
             print_tab(fmt, o);
-        fprintf(o, "%.*s", linelen, line);
+        fprintf(o, "%.*s\n", printlen, line);
 
-        line += linelen;
+        line += linelen + 1; /* skip \n */
     }
 
     if (ef->caption && *ef->caption) {
@@ -636,6 +646,9 @@ const docentry_t *fig, FILE *o)
         fprintf(o, "Fig %d. %s\n", fignum, ef->caption);
     }
     print_lf(o);
+
+    if (cropped)
+        fprintf(stderr, "warning: figure %d cropped\n", fignum);
 }
 
 void
